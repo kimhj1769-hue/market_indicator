@@ -27,6 +27,8 @@ st.markdown("""
   .stat-val { font-size:18px; font-weight:800; color:#fff; }
   .stat-lbl { font-size:10px; color:#555; margin-top:5px; letter-spacing:0.8px; text-transform:uppercase; }
   .js-plotly-plot, .plotly { touch-action: none !important; }
+  .modebar-btn { width: 36px !important; height: 36px !important; padding: 6px !important; }
+  .modebar { transform: scale(1.4); transform-origin: top right; }
   div[data-testid="stButton"] button {
     background:#1a1a35 !important; border:1px solid #2a2a4a !important;
     border-radius:8px !important; color:#aaa !important; font-size:13px !important;

@@ -28,6 +28,9 @@ st.markdown("""
   }
   div[data-testid="stButton"] button:hover { border-color:#4f8ef7 !important; color:#fff !important; }
   .js-plotly-plot, .plotly { touch-action: none !important; }
+  /* 모바일 툴바 버튼 크게 */
+  .modebar-btn { width: 36px !important; height: 36px !important; padding: 6px !important; }
+  .modebar { transform: scale(1.4); transform-origin: top right; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -223,7 +226,13 @@ fig.update_yaxes(range=[0, 100], row=3, col=1)
 
 st.plotly_chart(fig, use_container_width=True,
                 key=f"main_chart_{st.session_state['rc_chart']}",
-                config={"scrollZoom": True, "doubleClick": "reset+autosize", "displayModeBar": True})
+                config={
+                    "scrollZoom": False,
+                    "doubleClick": "reset+autosize",
+                    "displayModeBar": True,
+                    "modeBarButtonsToRemove": ["pan2d","select2d","lasso2d","autoScale2d","toggleSpikelines","hoverClosestCartesian","hoverCompareCartesian"],
+                    "modeBarButtonsToAdd": [],
+                })
 col_rst, _ = st.columns([1, 5])
 with col_rst:
     if st.button("↺  차트 초기화", key="btn_reset_chart", use_container_width=True):
