@@ -8,6 +8,11 @@ from utils import get_fear_greed, get_vix_history, get_put_call_ratio, get_vix_d
 
 st.set_page_config(page_title="VIX & Fear", page_icon="🌡️", layout="wide")
 
+if "rc_vix" not in st.session_state:
+    st.session_state["rc_vix"] = 0
+if "rc_pc" not in st.session_state:
+    st.session_state["rc_pc"] = 0
+
 st.markdown("""
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
@@ -250,7 +255,13 @@ if pc["history"]:
         )
 
     st.plotly_chart(fig_pc, use_container_width=True,
+                    key=f"pc_chart_{st.session_state['rc_pc']}",
                     config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": True})
+    col_rst, _ = st.columns([1, 5])
+    with col_rst:
+        if st.button("↺  초기화", key="btn_reset_pc", use_container_width=True):
+            st.session_state["rc_pc"] += 1
+            st.rerun()
     st.caption("※ P/C Ratio: 오늘 SPY+QQQ 옵션 체인 기준 · 히스토리는 VIX 참고선으로 표시")
 
 # ════════════════════════════════════════════════════════════════════
@@ -379,7 +390,13 @@ if not vix_tab.empty:
                    showline=False, zeroline=False),
     )
     st.plotly_chart(fig_v, use_container_width=True,
+                    key=f"vix_chart_{st.session_state['rc_vix']}",
                     config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": True})
+    col_rst, _ = st.columns([1, 5])
+    with col_rst:
+        if st.button("↺  초기화", key="btn_reset_vix", use_container_width=True):
+            st.session_state["rc_vix"] += 1
+            st.rerun()
 
     # 52주 레인지
     w52h = vix_d["week52_high"]

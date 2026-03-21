@@ -8,6 +8,9 @@ from utils import get_heatmap_data, get_nasdaq_heatmap_data, get_chart_data, cle
 
 st.set_page_config(page_title="Heatmap", page_icon="🗺️", layout="wide")
 
+if "rc_detail" not in st.session_state:
+    st.session_state["rc_detail"] = 0
+
 st.markdown("""
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
@@ -321,7 +324,13 @@ if selected_ticker:
         fig_detail.update_yaxes(range=[0, 100], row=3, col=1)
 
         st.plotly_chart(fig_detail, use_container_width=True,
+                        key=f"detail_chart_{st.session_state['rc_detail']}",
                         config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": True})
+        col_rst, _ = st.columns([1, 5])
+        with col_rst:
+            if st.button("↺  차트 초기화", key="btn_reset_detail", use_container_width=True):
+                st.session_state["rc_detail"] += 1
+                st.rerun()
 
         # ── 통계 카드 ─────────────────────────────────────────────────
         rsi_now  = float(rsi.dropna().iloc[-1])  if not rsi.dropna().empty  else 0

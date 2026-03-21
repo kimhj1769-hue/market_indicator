@@ -8,6 +8,9 @@ from utils import get_chart_data, clear_cache
 
 st.set_page_config(page_title="Charts", page_icon="📈", layout="wide")
 
+if "rc_chart" not in st.session_state:
+    st.session_state["rc_chart"] = 0
+
 st.markdown("""
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
@@ -218,7 +221,13 @@ fig.update_yaxes(showgrid=True, gridcolor="#1a1a2e", tickfont=dict(color="#444")
 fig.update_yaxes(range=[0, 100], row=3, col=1)
 
 st.plotly_chart(fig, use_container_width=True,
+                key=f"main_chart_{st.session_state['rc_chart']}",
                 config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": True})
+col_rst, _ = st.columns([1, 5])
+with col_rst:
+    if st.button("↺  차트 초기화", key="btn_reset_chart", use_container_width=True):
+        st.session_state["rc_chart"] += 1
+        st.rerun()
 
 # ── 하단 통계 카드 ────────────────────────────────────────────────────────
 c1,c2,c3,c4,c5,c6,c7 = st.columns(7)
