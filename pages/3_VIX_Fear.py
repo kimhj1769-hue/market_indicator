@@ -93,7 +93,7 @@ with col_gauge:
         font={"color": "white"},
     )
     st.plotly_chart(fig_fg, use_container_width=True,
-                    config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": True})
+                    config={"scrollZoom": True, "doubleClick": "reset+autosize", "displayModeBar": True})
 
     if len(fg["history"]) > 1:
         delta = fg_val - fg["history"][1]["value"]
@@ -145,7 +145,7 @@ if fg["history"]:
         yaxis=dict(range=[0,115], showgrid=False, tickfont=dict(color="#444")),
     )
     st.plotly_chart(fig_fh, use_container_width=True,
-                    config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": True})
+                    config={"scrollZoom": True, "doubleClick": "reset+autosize", "displayModeBar": True})
 
 # ════════════════════════════════════════════════════════════════════
 # 2. Put/Call Ratio
@@ -256,7 +256,7 @@ if pc["history"]:
 
     st.plotly_chart(fig_pc, use_container_width=True,
                     key=f"pc_chart_{st.session_state['rc_pc']}",
-                    config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": True})
+                    config={"scrollZoom": True, "doubleClick": "reset+autosize", "displayModeBar": True})
     col_rst, _ = st.columns([1, 5])
     with col_rst:
         if st.button("↺  초기화", key="btn_reset_pc", use_container_width=True):
@@ -391,7 +391,7 @@ if not vix_tab.empty:
     )
     st.plotly_chart(fig_v, use_container_width=True,
                     key=f"vix_chart_{st.session_state['rc_vix']}",
-                    config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": True})
+                    config={"scrollZoom": True, "doubleClick": "reset+autosize", "displayModeBar": True})
     col_rst, _ = st.columns([1, 5])
     with col_rst:
         if st.button("↺  초기화", key="btn_reset_vix", use_container_width=True):

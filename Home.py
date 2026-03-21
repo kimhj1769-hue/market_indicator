@@ -158,7 +158,7 @@ with col_fg:
         font={"color": "white"},
     )
     st.plotly_chart(fig_fg, use_container_width=True,
-                    config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": True})
+                    config={"scrollZoom": True, "doubleClick": "reset+autosize", "displayModeBar": True})
 
 # VIX 게이지
 with col_vix:
@@ -197,7 +197,7 @@ with col_vix:
         font={"color": "white"},
     )
     st.plotly_chart(fig_vix, use_container_width=True,
-                    config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": True})
+                    config={"scrollZoom": True, "doubleClick": "reset+autosize", "displayModeBar": True})
 
 # ── BTC / 나스닥 / S&P 차트 ────────────────────────────────────────────────
 st.markdown('<div class="sec-title">주요 차트 (1개월)</div>', unsafe_allow_html=True)
@@ -233,7 +233,7 @@ for col, sym, label, color, fmt in [
                 showlegend=False,
             )
             st.plotly_chart(fig, use_container_width=True,
-                            config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": True})
+                            config={"scrollZoom": True, "doubleClick": "reset+autosize", "displayModeBar": True})
         else:
             st.markdown(f'<div style="height:220px;background:#111126;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#444;font-size:13px">{label} 로딩 실패</div>', unsafe_allow_html=True)
 
@@ -259,7 +259,7 @@ if fg["history"]:
         yaxis=dict(range=[0,115], showgrid=False, tickfont=dict(color="#444")),
     )
     st.plotly_chart(fig_h, use_container_width=True,
-                    config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": True})
+                    config={"scrollZoom": True, "doubleClick": "reset+autosize", "displayModeBar": True})
 
 # 푸터
 st.markdown("""

@@ -222,7 +222,7 @@ fig.update_yaxes(range=[0, 100], row=3, col=1)
 
 st.plotly_chart(fig, use_container_width=True,
                 key=f"main_chart_{st.session_state['rc_chart']}",
-                config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": True})
+                config={"scrollZoom": True, "doubleClick": "reset+autosize", "displayModeBar": True})
 col_rst, _ = st.columns([1, 5])
 with col_rst:
     if st.button("↺  차트 초기화", key="btn_reset_chart", use_container_width=True):

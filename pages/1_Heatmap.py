@@ -119,7 +119,7 @@ fig.update_layout(
 
 # ── 클릭 이벤트 감지 ──────────────────────────────────────────────────────
 event = st.plotly_chart(fig, use_container_width=True, on_select="rerun", key="heatmap_treemap",
-                        config={"scrollZoom": False, "doubleClick": "reset+autosize"})
+                        config={"scrollZoom": True, "doubleClick": "reset+autosize"})
 
 # 클릭된 티커 추출
 clicked_ticker = None
@@ -325,7 +325,7 @@ if selected_ticker:
 
         st.plotly_chart(fig_detail, use_container_width=True,
                         key=f"detail_chart_{st.session_state['rc_detail']}",
-                        config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": True})
+                        config={"scrollZoom": True, "doubleClick": "reset+autosize", "displayModeBar": True})
         col_rst, _ = st.columns([1, 5])
         with col_rst:
             if st.button("↺  차트 초기화", key="btn_reset_detail", use_container_width=True):
