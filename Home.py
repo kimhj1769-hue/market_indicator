@@ -6,7 +6,7 @@ import pandas as pd
 from datetime import datetime
 from utils import get_market_overview, get_fear_greed, get_chart_data, clear_cache
 
-st.set_page_config(page_title="Market Dashboard", page_icon="📊",
+st.set_page_config(page_title="marketindicator", page_icon="📊",
                    layout="wide", initial_sidebar_state="collapsed")
 
 # CSS
