@@ -26,6 +26,7 @@ st.markdown("""
   .stat-box { background:#111126; border:1px solid #1e1e3a; border-radius:12px; padding:14px; text-align:center; }
   .stat-val { font-size:18px; font-weight:800; color:#fff; }
   .stat-lbl { font-size:10px; color:#555; margin-top:5px; letter-spacing:0.8px; text-transform:uppercase; }
+  .js-plotly-plot, .plotly { touch-action: none !important; }
   div[data-testid="stButton"] button {
     background:#1a1a35 !important; border:1px solid #2a2a4a !important;
     border-radius:8px !important; color:#aaa !important; font-size:13px !important;
@@ -300,7 +301,7 @@ if selected_ticker:
         # ── 레이아웃 ──────────────────────────────────────────────────
         fig_detail.update_layout(
             paper_bgcolor="#111126", plot_bgcolor="#0e0e1e",
-            height=820, margin=dict(t=20, b=10, l=8, r=80),
+            height=1000, margin=dict(t=20, b=10, l=8, r=80),
             font=dict(color="white", family="Inter"),
             legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(color="#888", size=11),
                         orientation="h", x=0, y=1.02),

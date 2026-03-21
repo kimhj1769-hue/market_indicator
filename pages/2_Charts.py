@@ -27,6 +27,7 @@ st.markdown("""
     font-size:13px !important; font-weight:600 !important;
   }
   div[data-testid="stButton"] button:hover { border-color:#4f8ef7 !important; color:#fff !important; }
+  .js-plotly-plot, .plotly { touch-action: none !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -192,7 +193,7 @@ fig.add_hline(y=0, line_dash="dot", line_color="#333", line_width=1, row=4, col=
 # ── 레이아웃 ──────────────────────────────────────────────────────────────
 fig.update_layout(
     paper_bgcolor="#111126", plot_bgcolor="#0e0e1e",
-    height=900, margin=dict(t=44, b=10, l=8, r=80),
+    height=1200, margin=dict(t=44, b=10, l=8, r=80),
     font=dict(color="white", family="Inter"),
     legend=dict(bgcolor="#111126", bordercolor="#1e1e3a", borderwidth=1,
                 font=dict(color="#aaa", size=11), x=1.01, y=1.0),

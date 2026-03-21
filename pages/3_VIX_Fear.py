@@ -34,6 +34,7 @@ st.markdown("""
     border-radius:8px !important; color:#aaa !important; font-size:13px !important;
   }
   div[data-testid="stButton"] button:hover { border-color:#4f8ef7 !important; color:#fff !important; }
+  .js-plotly-plot, .plotly { touch-action: none !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -227,7 +228,7 @@ if pc["history"]:
 
     fig_pc.update_layout(
         paper_bgcolor="#111126", plot_bgcolor="#0e0e1e",
-        height=400, margin=dict(t=16, b=30, l=8, r=100),
+        height=500, margin=dict(t=16, b=30, l=8, r=100),
         font=dict(color="white", family="Inter"),
         legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(color="#888", size=11),
                     orientation="h", x=0, y=1.06),
@@ -379,7 +380,7 @@ if not vix_tab.empty:
 
     fig_v.update_layout(
         paper_bgcolor="#111126", plot_bgcolor="#0e0e1e",
-        height=500, margin=dict(t=10, b=30, l=8, r=90),
+        height=600, margin=dict(t=10, b=30, l=8, r=90),
         font=dict(color="white", family="Inter"),
         legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(color="#888", size=11),
                     orientation="h", x=0, y=1.04),
