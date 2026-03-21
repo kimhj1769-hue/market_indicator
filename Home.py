@@ -14,7 +14,6 @@ st.markdown("""
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
   * { font-family: 'Inter', sans-serif; }
-  .js-plotly-plot, .plotly { touch-action: none !important; }
   .modebar-btn { width: 36px !important; height: 36px !important; padding: 6px !important; }
   .modebar { transform: scale(1.4); transform-origin: top right; }
   [data-testid="stAppViewContainer"] { background: #0d0d1a; }

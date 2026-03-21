@@ -34,7 +34,6 @@ st.markdown("""
     border-radius:8px !important; color:#aaa !important; font-size:13px !important;
   }
   div[data-testid="stButton"] button:hover { border-color:#4f8ef7 !important; color:#fff !important; }
-  .js-plotly-plot, .plotly { touch-action: none !important; }
   .modebar-btn { width: 36px !important; height: 36px !important; padding: 6px !important; }
   .modebar { transform: scale(1.4); transform-origin: top right; }
 </style>

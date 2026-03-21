@@ -27,7 +27,6 @@ st.markdown("""
     font-size:13px !important; font-weight:600 !important;
   }
   div[data-testid="stButton"] button:hover { border-color:#4f8ef7 !important; color:#fff !important; }
-  .js-plotly-plot, .plotly { touch-action: none !important; }
   /* 모바일 툴바 버튼 크게 */
   .modebar-btn { width: 36px !important; height: 36px !important; padding: 6px !important; }
   .modebar { transform: scale(1.4); transform-origin: top right; }
