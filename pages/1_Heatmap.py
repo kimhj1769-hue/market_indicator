@@ -3,7 +3,7 @@
 import streamlit as st
 import plotly.graph_objects as go
 import pandas as pd
-from utils import get_heatmap_data
+from utils import get_heatmap_data, get_nasdaq_heatmap_data
 
 st.set_page_config(page_title="Heatmap", page_icon="🗺️", layout="wide")
 
@@ -27,19 +27,22 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown("## 🗺️ S&P 500 섹터 히트맵")
+st.markdown("## 🗺️ 시장 히트맵")
 st.caption("크기: 시가총액 비례  ·  색상: 당일 등락률  ·  Finviz 스타일")
 
-col_btn, col_range = st.columns([1, 3])
+col_tab, col_range, col_btn = st.columns([2, 2, 1])
+with col_tab:
+    market_tab = st.radio("시장", ["S&P 500", "NASDAQ 100"],
+                           horizontal=True, label_visibility="collapsed")
+with col_range:
+    color_range = st.slider("색상 범위 (%)", 1, 10, 3, 1, label_visibility="collapsed")
 with col_btn:
     if st.button("⟳  Refresh"):
         st.cache_data.clear()
         st.rerun()
-with col_range:
-    color_range = st.slider("색상 범위 (%)", 1, 10, 3, 1, label_visibility="collapsed")
 
-with st.spinner("데이터 로딩 중... (약 10~20초)"):
-    df = get_heatmap_data()
+with st.spinner("데이터 로딩 중... (5~10초)"):
+    df = get_heatmap_data() if market_tab == "S&P 500" else get_nasdaq_heatmap_data()
 
 if df.empty:
     st.error("데이터를 불러올 수 없습니다.")

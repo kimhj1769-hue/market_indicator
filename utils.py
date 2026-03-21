@@ -109,81 +109,141 @@ def get_fear_greed() -> dict:
 
 # ── S&P500 섹터 히트맵 데이터 ─────────────────────────────────────────────
 
-# S&P500 대표 종목 (섹터별)
+# S&P500 대표 종목 (섹터별, 섹터당 20종목)
 SP500_UNIVERSE = {
-    "Technology":    ["AAPL","MSFT","NVDA","AVGO","AMD","ORCL","QCOM","TXN","AMAT","MU"],
-    "Communication": ["META","GOOGL","NFLX","TMUS","DIS","VZ","T","CMCSA","EA","TTWO"],
-    "Consumer Disc": ["AMZN","TSLA","HD","MCD","NKE","SBUX","BKNG","TJX","EBAY","F"],
-    "Financials":    ["BRK-B","JPM","V","MA","BAC","WFC","GS","MS","BLK","AXP"],
-    "Healthcare":    ["LLY","UNH","JNJ","MRK","ABBV","TMO","ABT","DHR","BMY","ISRG"],
-    "Industrials":   ["RTX","HON","UPS","CAT","DE","LMT","GE","BA","MMM","EMR"],
-    "Energy":        ["XOM","CVX","COP","SLB","EOG","PXD","MPC","PSX","VLO","OXY"],
-    "Consumer Stpl": ["WMT","PG","KO","PEP","COST","PM","MO","CL","GIS","KHC"],
-    "Real Estate":   ["PLD","AMT","EQIX","CCI","SPG","PSA","WELL","DLR","AVB","EQR"],
-    "Utilities":     ["NEE","DUK","SO","D","AEP","EXC","SRE","XEL","WEC","ES"],
-    "Materials":     ["LIN","APD","SHW","FCX","NEM","NUE","VMC","MLM","CF","MOS"],
+    "Technology":    ["AAPL","MSFT","NVDA","AVGO","AMD","ORCL","QCOM","TXN","AMAT","MU",
+                      "INTC","NOW","ADBE","CRM","KLAC","LRCX","SNPS","CDNS","MRVL","HPQ"],
+    "Communication": ["META","GOOGL","NFLX","TMUS","DIS","VZ","T","CMCSA","EA","TTWO",
+                      "GOOG","CHTR","MTCH","WBD","FOXA","OMC","NWSA","LYV","SIRI","ZM"],
+    "Consumer Disc": ["AMZN","TSLA","HD","MCD","NKE","SBUX","BKNG","TJX","EBAY","F",
+                      "GM","ABNB","CMG","ORLY","AZO","DHI","LEN","ROST","YUM","MAR"],
+    "Financials":    ["BRK-B","JPM","V","MA","BAC","WFC","GS","MS","BLK","AXP",
+                      "C","SCHW","CB","PGR","ICE","CME","AON","TRV","ALL","MET"],
+    "Healthcare":    ["LLY","UNH","JNJ","MRK","ABBV","TMO","ABT","DHR","BMY","ISRG",
+                      "CVS","AMGN","GILD","VRTX","REGN","ZTS","CI","HUM","BSX","MDT"],
+    "Industrials":   ["RTX","HON","UPS","CAT","DE","LMT","GE","BA","MMM","EMR",
+                      "ETN","ITW","PH","GD","NOC","FDX","NSC","CSX","WM","RSG"],
+    "Energy":        ["XOM","CVX","COP","SLB","EOG","OXY","MPC","PSX","VLO","HAL",
+                      "BKR","DVN","APA","CTRA","PR","SM","OVV","LNG","TRGP","WMB"],
+    "Consumer Stpl": ["WMT","PG","KO","PEP","COST","PM","MO","CL","GIS","KHC",
+                      "MDLZ","STZ","HSY","SJM","CPB","HRL","TSN","CAG","MKC","CHD"],
+    "Real Estate":   ["PLD","AMT","EQIX","CCI","SPG","PSA","WELL","DLR","AVB","EQR",
+                      "O","VICI","WY","IRM","ESS","MAA","UDR","CPT","BXP","KIM"],
+    "Utilities":     ["NEE","DUK","SO","D","AEP","EXC","SRE","XEL","WEC","ES",
+                      "ED","ETR","FE","PPL","CMS","AES","EIX","NI","PNW","LNT"],
+    "Materials":     ["LIN","APD","SHW","FCX","NEM","NUE","VMC","MLM","CF","MOS",
+                      "ECL","PPG","EMN","ALB","IFF","CE","SEE","PKG","IP","SON"],
+}
+
+# 나스닥100 대표 종목
+NASDAQ100_UNIVERSE = {
+    "Mega Cap Tech":   ["AAPL","MSFT","NVDA","GOOGL","GOOG","META","AMZN","TSLA","AVGO","ORCL"],
+    "Software":        ["ADBE","CRM","NOW","PANW","SNPS","CDNS","TEAM","WDAY","ZS","DDOG"],
+    "Semiconductors":  ["AMD","QCOM","TXN","MU","AMAT","KLAC","LRCX","MRVL","ON","MCHP"],
+    "Internet/Media":  ["NFLX","TMUS","CMCSA","CSCO","INTC","PYPL","INTU","ADI","ASML","MELI"],
+    "Biotech/Health":  ["AMGN","GILD","VRTX","REGN","MRNA","BIIB","DXCM","IDXX","ILMN","ALGN"],
+    "Consumer Tech":   ["COST","SBUX","BKNG","ABNB","EBAY","DLTR","FAST","ODFL","CTAS","PAYX"],
 }
 
 
-def get_heatmap_data() -> pd.DataFrame:
-    """섹터별 종목 수익률 + 시가총액 반환 (히트맵용)."""
-    key = "heatmap"
-    cached = _get_cached(key, ttl=120)
+# 시가총액 사전 정의 (단위: 억달러 × 1e9) — API 호출 없이 즉시 사용
+# 실제 값과 약간 차이 있어도 히트맵 비율에는 충분
+_MKTCAP_B = {
+    # Technology
+    "AAPL":3500,"MSFT":3100,"NVDA":2800,"AVGO":800,"AMD":300,"ORCL":450,
+    "QCOM":200,"TXN":180,"AMAT":160,"MU":130,"INTC":90,"NOW":200,
+    "ADBE":200,"CRM":260,"KLAC":100,"LRCX":90,"SNPS":90,"CDNS":75,
+    "MRVL":70,"HPQ":30,
+    # Communication
+    "META":1400,"GOOGL":2100,"GOOG":2100,"NFLX":350,"TMUS":250,"DIS":200,
+    "VZ":160,"T":150,"CMCSA":150,"EA":40,"TTWO":25,"CHTR":40,
+    "MTCH":10,"WBD":20,"FOXA":25,"IPG":10,"OMC":20,"NWSA":15,"LYV":25,"PARA":5,
+    # Consumer Disc
+    "AMZN":2000,"TSLA":700,"HD":350,"MCD":200,"NKE":120,"SBUX":90,
+    "BKNG":150,"TJX":130,"EBAY":30,"F":50,"GM":50,"ABNB":90,"CMG":75,
+    "ORLY":60,"AZO":55,"DHI":50,"LEN":45,"ROST":50,"YUM":35,"MAR":60,
+    # Financials
+    "BRK-B":900,"JPM":700,"V":550,"MA":450,"BAC":350,"WFC":250,
+    "GS":180,"MS":170,"BLK":150,"AXP":200,"C":120,"SCHW":130,
+    "CB":90,"PGR":130,"MMC":90,"ICE":70,"CME":75,"AON":70,"TRV":55,"ALL":45,
+    # Healthcare
+    "LLY":700,"UNH":500,"JNJ":400,"MRK":300,"ABBV":330,"TMO":200,
+    "ABT":180,"DHR":150,"BMY":130,"ISRG":180,"CVS":80,"AMGN":160,
+    "GILD":90,"VRTX":120,"REGN":100,"ZTS":80,"CI":90,"HUM":60,"BSX":100,"MDT":90,
+    # Industrials
+    "RTX":200,"HON":130,"UPS":100,"CAT":190,"DE":130,"LMT":130,
+    "GE":200,"BA":120,"MMM":60,"EMR":70,"ETN":120,"ITW":80,"PH":80,
+    "GD":75,"NOC":70,"FDX":60,"NSC":60,"CSX":60,"WM":70,"RSG":60,
+    # Energy
+    "XOM":450,"CVX":300,"COP":150,"SLB":60,"EOG":70,"OXY":50,
+    "HAL":30,"MPC":70,"PSX":60,"VLO":50,"BKR":35,"FANG":25,
+    "DVN":20,"HES":40,"MRO":15,"APA":10,"CTRA":10,"PR":8,"SM":8,"OVV":10,
+    # Consumer Staples
+    "WMT":700,"PG":400,"KO":280,"PEP":230,"COST":350,"PM":150,
+    "MO":80,"CL":60,"GIS":35,"KHC":35,"MDLZ":80,"STZ":50,"HSY":35,
+    "SJM":15,"CPB":15,"HRL":20,"K":20,"TSN":20,"CAG":15,"MKC":20,
+    # Real Estate
+    "PLD":120,"AMT":100,"EQIX":80,"CCI":50,"SPG":70,"PSA":50,
+    "WELL":60,"DLR":50,"AVB":30,"EQR":25,"O":55,"VICI":35,
+    "WY":20,"IRM":25,"ESS":20,"MAA":18,"UDR":15,"CPT":15,"BXP":12,"KIM":10,
+    # Utilities
+    "NEE":120,"DUK":80,"SO":70,"D":50,"AEP":50,"EXC":40,
+    "SRE":50,"XEL":35,"WEC":30,"ES":25,"ED":25,"ETR":20,
+    "FE":20,"PPL":20,"CMS":18,"AES":15,"EIX":25,"NI":12,"PNW":10,"LNT":10,
+    # Materials
+    "LIN":220,"APD":70,"SHW":90,"FCX":55,"NEM":50,"NUE":35,
+    "VMC":30,"MLM":30,"CF":20,"MOS":15,"ECL":60,"PPG":30,"EMN":12,
+    "ALB":15,"IFF":20,"CE":10,"SEE":8,"PKG":15,"IP":12,"SON":8,
+    # Nasdaq extra
+    "CSCO":200,"PYPL":65,"INTU":180,"ADI":90,"ASML":300,"MELI":80,
+    "PANW":120,"ANSS":25,"TEAM":45,"WDAY":55,"ZS":30,"MRNA":20,
+    "BIIB":35,"DXCM":25,"IDXX":30,"ILMN":20,"ALGN":15,"DLTR":30,
+    "FAST":40,"ODFL":40,"CTAS":60,"PAYX":50,"ON":30,"MCHP":40,
+}
+
+def _fetch_heatmap(universe: dict, cache_key: str) -> pd.DataFrame:
+    """공통 히트맵 데이터 로더."""
+    cached = _get_cached(cache_key, ttl=300)
     if cached is not None:
         return cached
 
     rows = []
-    all_tickers = [t for tickers in SP500_UNIVERSE.values() for t in tickers]
-
+    all_tickers = [t for tickers in universe.values() for t in tickers]
     try:
-        raw = yf.download(
-            all_tickers,
-            period="2d",
-            interval="1d",
-            auto_adjust=True,
-            group_by="ticker",
-            progress=False,
-        )
-
-        for sector, tickers in SP500_UNIVERSE.items():
+        raw = yf.download(all_tickers, period="2d", interval="1d",
+                          auto_adjust=True, group_by="ticker", progress=False)
+        for sector, tickers in universe.items():
             for ticker in tickers:
                 try:
-                    if len(all_tickers) == 1:
-                        hist = raw
-                    else:
-                        hist = raw[ticker]
+                    hist = raw[ticker] if len(all_tickers) > 1 else raw
                     hist = hist.dropna(how="all")
                     if len(hist) < 2:
                         continue
                     prev = float(hist["Close"].iloc[-2])
                     cur  = float(hist["Close"].iloc[-1])
                     pct  = (cur - prev) / prev * 100
-
-                    # 시가총액 (간략 근사: 현재가 × 임의 가중치)
-                    info   = yf.Ticker(ticker).fast_info
-                    mktcap = getattr(info, "market_cap", 10_000_000_000) or 10_000_000_000
-
-                    rows.append({
-                        "sector": sector,
-                        "ticker": ticker,
-                        "pct":    round(pct, 2),
-                        "mktcap": mktcap,
-                        "price":  round(cur, 2),
-                    })
+                    mktcap = _MKTCAP_B.get(ticker, 10) * 1_000_000_000
+                    rows.append({"sector": sector, "ticker": ticker,
+                                 "pct": round(pct, 2), "mktcap": mktcap, "price": round(cur, 2)})
                 except Exception:
-                    rows.append({
-                        "sector": sector,
-                        "ticker": ticker,
-                        "pct":    0.0,
-                        "mktcap": 10_000_000_000,
-                        "price":  0.0,
-                    })
+                    rows.append({"sector": sector, "ticker": ticker,
+                                 "pct": 0.0, "mktcap": _MKTCAP_B.get(ticker, 10)*1_000_000_000, "price": 0.0})
     except Exception:
         pass
 
     df = pd.DataFrame(rows)
-    _set_cache(key, df)
+    _set_cache(cache_key, df)
     return df
+
+
+def get_heatmap_data() -> pd.DataFrame:
+    """S&P500 섹터별 히트맵 데이터."""
+    return _fetch_heatmap(SP500_UNIVERSE, "heatmap_sp500")
+
+
+def get_nasdaq_heatmap_data() -> pd.DataFrame:
+    """나스닥100 히트맵 데이터."""
+    return _fetch_heatmap(NASDAQ100_UNIVERSE, "heatmap_nasdaq")
 
 
 # ── 개별 차트 데이터 ─────────────────────────────────────────────────────
