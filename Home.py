@@ -56,6 +56,13 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# 앱 이름 메타 태그 (홈 화면 추가 시 이름 지정)
+st.markdown("""
+<meta name="apple-mobile-web-app-title" content="marketindicator">
+<meta name="application-name" content="marketindicator">
+<meta name="apple-mobile-web-app-capable" content="yes">
+""", unsafe_allow_html=True)
+
 # 날짜
 _now = datetime.now()
 _DAYS = ["월요일","화요일","수요일","목요일","금요일","토요일","일요일"]
