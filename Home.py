@@ -154,10 +154,11 @@ with col_fg:
     ))
     fig_fg.update_layout(
         paper_bgcolor="#111126", plot_bgcolor="#111126",
-        height=300, margin=dict(t=120, b=50, l=20, r=20),
+        height=380, margin=dict(t=120, b=50, l=20, r=20),
         font={"color": "white"},
     )
-    st.plotly_chart(fig_fg, use_container_width=True)
+    st.plotly_chart(fig_fg, use_container_width=True,
+                    config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": False})
 
 # VIX 게이지
 with col_vix:
@@ -192,10 +193,11 @@ with col_vix:
     ))
     fig_vix.update_layout(
         paper_bgcolor="#111126", plot_bgcolor="#111126",
-        height=300, margin=dict(t=120, b=50, l=20, r=20),
+        height=380, margin=dict(t=120, b=50, l=20, r=20),
         font={"color": "white"},
     )
-    st.plotly_chart(fig_vix, use_container_width=True)
+    st.plotly_chart(fig_vix, use_container_width=True,
+                    config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": False})
 
 # ── BTC / 나스닥 / S&P 차트 ────────────────────────────────────────────────
 st.markdown('<div class="sec-title">주요 차트 (1개월)</div>', unsafe_allow_html=True)
@@ -224,13 +226,14 @@ for col, sym, label, color, fmt in [
                     font=dict(color="white", size=14), x=0.02,
                 ),
                 paper_bgcolor="#111126", plot_bgcolor="#0e0e1e",
-                height=220, margin=dict(t=44, b=10, l=8, r=8),
+                height=300, margin=dict(t=44, b=10, l=8, r=8),
                 xaxis=dict(showgrid=False, tickfont=dict(color="#444"), showline=False),
                 yaxis=dict(showgrid=True, gridcolor="#1a1a30", tickformat=fmt,
                            tickfont=dict(color="#444"), showline=False),
                 showlegend=False,
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, use_container_width=True,
+                            config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": False})
         else:
             st.markdown(f'<div style="height:220px;background:#111126;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#444;font-size:13px">{label} 로딩 실패</div>', unsafe_allow_html=True)
 
@@ -251,11 +254,12 @@ if fg["history"]:
                     annotation_position="right")
     fig_h.update_layout(
         paper_bgcolor="#111126", plot_bgcolor="#0e0e1e",
-        height=180, margin=dict(t=10, b=10, l=8, r=70),
+        height=250, margin=dict(t=10, b=10, l=8, r=70),
         xaxis=dict(showgrid=False, tickfont=dict(color="#444")),
         yaxis=dict(range=[0,115], showgrid=False, tickfont=dict(color="#444")),
     )
-    st.plotly_chart(fig_h, use_container_width=True)
+    st.plotly_chart(fig_h, use_container_width=True,
+                    config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": False})
 
 # 푸터
 st.markdown("""

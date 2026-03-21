@@ -110,12 +110,13 @@ fig = go.Figure(go.Treemap(
 
 fig.update_layout(
     paper_bgcolor="#0d0d1a", plot_bgcolor="#0d0d1a",
-    height=700, margin=dict(t=4, b=4, l=4, r=30),
+    height=800, margin=dict(t=4, b=4, l=4, r=30),
     font=dict(color="white", family="Inter"),
 )
 
 # ── 클릭 이벤트 감지 ──────────────────────────────────────────────────────
-event = st.plotly_chart(fig, use_container_width=True, on_select="rerun", key="heatmap_treemap")
+event = st.plotly_chart(fig, use_container_width=True, on_select="rerun", key="heatmap_treemap",
+                        config={"scrollZoom": False, "doubleClick": "reset+autosize"})
 
 # 클릭된 티커 추출
 clicked_ticker = None
@@ -296,7 +297,7 @@ if selected_ticker:
         # ── 레이아웃 ──────────────────────────────────────────────────
         fig_detail.update_layout(
             paper_bgcolor="#111126", plot_bgcolor="#0e0e1e",
-            height=720, margin=dict(t=20, b=10, l=8, r=80),
+            height=820, margin=dict(t=20, b=10, l=8, r=80),
             font=dict(color="white", family="Inter"),
             legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(color="#888", size=11),
                         orientation="h", x=0, y=1.02),
@@ -319,7 +320,8 @@ if selected_ticker:
                                 tickfont=dict(color="#444"), zeroline=False)
         fig_detail.update_yaxes(range=[0, 100], row=3, col=1)
 
-        st.plotly_chart(fig_detail, use_container_width=True)
+        st.plotly_chart(fig_detail, use_container_width=True,
+                        config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": False})
 
         # ── 통계 카드 ─────────────────────────────────────────────────
         rsi_now  = float(rsi.dropna().iloc[-1])  if not rsi.dropna().empty  else 0

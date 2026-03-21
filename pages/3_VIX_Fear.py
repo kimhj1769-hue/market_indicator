@@ -84,10 +84,11 @@ with col_gauge:
     ))
     fig_fg.update_layout(
         paper_bgcolor="#111126", plot_bgcolor="#111126",
-        height=320, margin=dict(t=130, b=60, l=20, r=20),
+        height=420, margin=dict(t=130, b=60, l=20, r=20),
         font={"color": "white"},
     )
-    st.plotly_chart(fig_fg, use_container_width=True)
+    st.plotly_chart(fig_fg, use_container_width=True,
+                    config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": False})
 
     if len(fg["history"]) > 1:
         delta = fg_val - fg["history"][1]["value"]
@@ -134,11 +135,12 @@ if fg["history"]:
                      annotation_text="Neutral", annotation_font_color="#444", annotation_position="right")
     fig_fh.update_layout(
         paper_bgcolor="#111126", plot_bgcolor="#0e0e1e",
-        height=200, margin=dict(t=10, b=10, l=8, r=60),
+        height=280, margin=dict(t=10, b=10, l=8, r=60),
         xaxis=dict(showgrid=False, tickfont=dict(color="#444")),
         yaxis=dict(range=[0,115], showgrid=False, tickfont=dict(color="#444")),
     )
-    st.plotly_chart(fig_fh, use_container_width=True)
+    st.plotly_chart(fig_fh, use_container_width=True,
+                    config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": False})
 
 # ════════════════════════════════════════════════════════════════════
 # 2. Put/Call Ratio
@@ -220,7 +222,7 @@ if pc["history"]:
 
     fig_pc.update_layout(
         paper_bgcolor="#111126", plot_bgcolor="#0e0e1e",
-        height=320, margin=dict(t=16, b=30, l=8, r=100),
+        height=400, margin=dict(t=16, b=30, l=8, r=100),
         font=dict(color="white", family="Inter"),
         legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(color="#888", size=11),
                     orientation="h", x=0, y=1.06),
@@ -247,7 +249,8 @@ if pc["history"]:
             bgcolor="#111126", bordercolor=pc_color, borderwidth=1, borderpad=4,
         )
 
-    st.plotly_chart(fig_pc, use_container_width=True)
+    st.plotly_chart(fig_pc, use_container_width=True,
+                    config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": False})
     st.caption("※ P/C Ratio: 오늘 SPY+QQQ 옵션 체인 기준 · 히스토리는 VIX 참고선으로 표시")
 
 # ════════════════════════════════════════════════════════════════════
@@ -365,7 +368,7 @@ if not vix_tab.empty:
 
     fig_v.update_layout(
         paper_bgcolor="#111126", plot_bgcolor="#0e0e1e",
-        height=400, margin=dict(t=10, b=30, l=8, r=90),
+        height=500, margin=dict(t=10, b=30, l=8, r=90),
         font=dict(color="white", family="Inter"),
         legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(color="#888", size=11),
                     orientation="h", x=0, y=1.04),
@@ -375,7 +378,8 @@ if not vix_tab.empty:
         yaxis=dict(showgrid=True, gridcolor="#1a1a2e", tickfont=dict(color="#555"),
                    showline=False, zeroline=False),
     )
-    st.plotly_chart(fig_v, use_container_width=True)
+    st.plotly_chart(fig_v, use_container_width=True,
+                    config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": False})
 
     # 52주 레인지
     w52h = vix_d["week52_high"]

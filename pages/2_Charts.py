@@ -189,7 +189,7 @@ fig.add_hline(y=0, line_dash="dot", line_color="#333", line_width=1, row=4, col=
 # ── 레이아웃 ──────────────────────────────────────────────────────────────
 fig.update_layout(
     paper_bgcolor="#111126", plot_bgcolor="#0e0e1e",
-    height=800, margin=dict(t=44, b=10, l=8, r=80),
+    height=900, margin=dict(t=44, b=10, l=8, r=80),
     font=dict(color="white", family="Inter"),
     legend=dict(bgcolor="#111126", bordercolor="#1e1e3a", borderwidth=1,
                 font=dict(color="#aaa", size=11), x=1.01, y=1.0),
@@ -217,7 +217,8 @@ fig.update_yaxes(showgrid=True, gridcolor="#1a1a2e", tickfont=dict(color="#444")
 # RSI y축 고정
 fig.update_yaxes(range=[0, 100], row=3, col=1)
 
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, use_container_width=True,
+                config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": False})
 
 # ── 하단 통계 카드 ────────────────────────────────────────────────────────
 c1,c2,c3,c4,c5,c6,c7 = st.columns(7)
