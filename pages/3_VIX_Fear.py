@@ -4,7 +4,7 @@ import streamlit as st
 import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
-from utils import get_fear_greed, get_vix_history, get_put_call_ratio
+from utils import get_fear_greed, get_vix_history, get_put_call_ratio, get_vix_detail
 
 st.set_page_config(page_title="VIX & Fear", page_icon="🌡️", layout="wide")
 
@@ -52,9 +52,10 @@ with col_btn:
         st.rerun()
 
 with st.spinner(""):
-    fg  = get_fear_greed()
-    vix = get_vix_history(period=period)
-    pc  = get_put_call_ratio()
+    fg     = get_fear_greed()
+    vix    = get_vix_history(period=period)
+    pc     = get_put_call_ratio()
+    vix_d  = get_vix_detail()
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -318,57 +319,191 @@ with col_pc3:
 
 
 # ════════════════════════════════════════════════════════════════════════════
-# 4. VIX 차트
+# 4. VIX — investing.com 스타일
 # ════════════════════════════════════════════════════════════════════════════
-st.markdown('<div class="sec-title">VIX 공포지수 추이</div>', unsafe_allow_html=True)
+st.markdown('<div class="sec-title">VIX 공포지수 (CBOE Volatility Index)</div>',
+            unsafe_allow_html=True)
 
-if not vix.empty:
-    cur_vix = vix["close"].iloc[-1]
-    if cur_vix < 20:   vc = "#00e676"
-    elif cur_vix < 30: vc = "#ffd600"
-    else:              vc = "#ff5252"
+# ── 현재가 헤더 ──────────────────────────────────────────────────────────
+v_price = vix_d["price"]
+v_chg   = vix_d["change"]
+v_pct   = vix_d["pct"]
 
-    fig_vix = go.Figure()
-    # 공포 구간 배경
-    fear_zone = vix[vix["close"] > 30]
-    if not fear_zone.empty:
-        fig_vix.add_vrect(
-            x0=fear_zone.index[0], x1=fear_zone.index[-1],
-            fillcolor="rgba(255,82,82,0.07)", line_width=0,
-            annotation_text="공포구간", annotation_font_color="#ff5252",
-            annotation_position="top left",
-        )
-    fig_vix.add_trace(go.Scatter(
-        x=vix.index, y=vix["close"],
-        mode="lines", line=dict(color=vc, width=2),
-        fill="tozeroy", fillcolor=f"rgba{tuple(list(int(vc.lstrip('#')[i:i+2],16) for i in (0,2,4))+[0])}".replace(", 0)",", 0.08)"),
-        name="VIX",
-    ))
-    fig_vix.add_hline(y=20, line_dash="dot", line_color="#ffd600", opacity=0.5,
-                      annotation_text="주의 20", annotation_font_color="#ffd600",
-                      annotation_position="right")
-    fig_vix.add_hline(y=30, line_dash="dot", line_color="#ff5252", opacity=0.5,
-                      annotation_text="공포 30", annotation_font_color="#ff5252",
-                      annotation_position="right")
-    fig_vix.update_layout(
-        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="#0e0e20",
-        height=260, margin=dict(t=10, b=10, l=8, r=70),
-        font=dict(color="white"),
-        xaxis=dict(showgrid=False, tickfont=dict(color="#444")),
-        yaxis=dict(showgrid=True, gridcolor="#1a1a30", tickfont=dict(color="#444")),
-        showlegend=False,
+if v_price < 15:    v_status, v_color = "안정",        "#00e676"
+elif v_price < 20:  v_status, v_color = "낮음",        "#69f0ae"
+elif v_price < 25:  v_status, v_color = "보통",        "#ffd600"
+elif v_price < 30:  v_status, v_color = "주의",        "#ff9100"
+elif v_price < 40:  v_status, v_color = "공포",        "#ff5252"
+else:               v_status, v_color = "극도의 공포",  "#ff1744"
+
+chg_col = "#ff5252" if v_chg >= 0 else "#00e676"   # VIX 상승=나쁨=빨강
+chg_sym = "▲" if v_chg >= 0 else "▼"
+
+st.markdown(f"""
+<div style="background:linear-gradient(135deg,#111126,#0e0e1e);
+            border:1px solid #1e1e3a; border-radius:16px;
+            padding:24px 28px; margin-bottom:16px;">
+  <div style="display:flex; align-items:flex-end; gap:16px; flex-wrap:wrap;">
+    <div>
+      <div style="font-size:13px;color:#555;letter-spacing:1px;
+                  text-transform:uppercase;margin-bottom:6px;">
+        CBOE Volatility Index · VIX
+      </div>
+      <div style="font-size:56px;font-weight:800;color:{v_color};
+                  letter-spacing:-1px;line-height:1;">
+        {v_price:.2f}
+      </div>
+    </div>
+    <div style="padding-bottom:10px;">
+      <div style="font-size:22px;font-weight:700;color:{chg_col};">
+        {chg_sym} {abs(v_chg):.2f} ({abs(v_pct):.2f}%)
+      </div>
+      <div style="font-size:13px;font-weight:700;color:{v_color};
+                  margin-top:4px;letter-spacing:0.5px;">
+        ● {v_status}
+      </div>
+    </div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+# ── 주요 지표 바 ─────────────────────────────────────────────────────────
+stats_items = [
+    ("시가",        f"{vix_d['open']:.2f}"),
+    ("전일 종가",   f"{vix_d['prev_close']:.2f}"),
+    ("일중 고가",   f"{vix_d['high']:.2f}"),
+    ("일중 저가",   f"{vix_d['low']:.2f}"),
+    ("52주 최고",   f"{vix_d['week52_high']:.2f}"),
+    ("52주 최저",   f"{vix_d['week52_low']:.2f}"),
+    ("3개월 평균",  f"{vix_d['avg3m']:.2f}"),
+]
+
+cols_s = st.columns(len(stats_items))
+for col, (lbl, val) in zip(cols_s, stats_items):
+    col.markdown(
+        f'<div style="background:#111126;border:1px solid #1e1e3a;'
+        f'border-radius:10px;padding:12px 10px;text-align:center;">'
+        f'<div style="font-size:16px;font-weight:800;color:#fff;">{val}</div>'
+        f'<div style="font-size:10px;color:#555;margin-top:5px;'
+        f'letter-spacing:0.8px;text-transform:uppercase;">{lbl}</div></div>',
+        unsafe_allow_html=True,
     )
-    st.plotly_chart(fig_vix, use_container_width=True)
 
-    c1, c2, c3, c4 = st.columns(4)
-    for col, label, val in [
-        (c1, "현재 VIX",  f"{vix['close'].iloc[-1]:.2f}"),
-        (c2, "기간 최고", f"{vix['high'].max():.2f}"),
-        (c3, "기간 최저", f"{vix['low'].min():.2f}"),
-        (c4, "평균",      f"{vix['close'].mean():.2f}"),
+st.markdown("<br>", unsafe_allow_html=True)
+
+# ── 기간 탭 선택 ─────────────────────────────────────────────────────────
+period_map = {
+    "1일": ("5d", "15m"),
+    "1주": ("1mo", "1d"),
+    "1개월": ("1mo", "1d"),
+    "3개월": ("3mo", "1d"),
+    "6개월": ("6mo", "1d"),
+    "1년":   ("1y",  "1d"),
+}
+tab_labels = list(period_map.keys())
+selected_tab = st.radio("기간", tab_labels, index=3,
+                         horizontal=True, label_visibility="collapsed")
+v_period, v_interval = period_map[selected_tab]
+vix_tab = get_vix_history(period=v_period) if v_period != "5d" else \
+          __import__("utils").get_chart_data("^VIX", period=v_period, interval=v_interval)
+
+# ── 캔들 + 볼린저 차트 ───────────────────────────────────────────────────
+if not vix_tab.empty:
+    from plotly.subplots import make_subplots
+
+    fig_v2 = make_subplots(
+        rows=2, cols=1, shared_xaxes=True,
+        vertical_spacing=0.02, row_heights=[0.78, 0.22],
+    )
+
+    # 캔들스틱
+    fig_v2.add_trace(go.Candlestick(
+        x=vix_tab.index,
+        open=vix_tab["open"], high=vix_tab["high"],
+        low=vix_tab["low"],   close=vix_tab["close"],
+        increasing_line_color="#ff5252", increasing_fillcolor="#ff5252",
+        decreasing_line_color="#00e676", decreasing_fillcolor="#00e676",
+        name="VIX",
+    ), row=1, col=1)
+
+    # MA20
+    if len(vix_tab) >= 20:
+        ma20 = vix_tab["close"].rolling(20).mean()
+        fig_v2.add_trace(go.Scatter(
+            x=vix_tab.index, y=ma20,
+            line=dict(color="#4f8ef7", width=1.5), name="MA20", opacity=0.8,
+        ), row=1, col=1)
+
+    # 볼린저밴드
+    if len(vix_tab) >= 20:
+        std = vix_tab["close"].rolling(20).std()
+        fig_v2.add_trace(go.Scatter(
+            x=vix_tab.index, y=ma20 + 2 * std,
+            line=dict(color="#cc44ff", width=1, dash="dot"), name="BB+2σ", opacity=0.6,
+        ), row=1, col=1)
+        fig_v2.add_trace(go.Scatter(
+            x=vix_tab.index, y=ma20 - 2 * std,
+            line=dict(color="#cc44ff", width=1, dash="dot"), name="BB-2σ",
+            fill="tonexty", fillcolor="rgba(204,68,255,0.04)", opacity=0.6,
+        ), row=1, col=1)
+
+    # 기준선
+    for y_val, lbl, col_line in [
+        (20, "주의 20", "#ffd600"),
+        (30, "공포 30", "#ff5252"),
     ]:
-        col.markdown(
-            f'<div class="stat-box"><div class="stat-val" style="color:#ffd600">{val}</div>'
-            f'<div class="stat-lbl">{label}</div></div>',
-            unsafe_allow_html=True,
-        )
+        fig_v2.add_hline(y=y_val, line_dash="dot", line_color=col_line, opacity=0.5,
+                         annotation_text=lbl, annotation_font_color=col_line,
+                         annotation_position="right", row=1, col=1)
+
+    # 거래량 대신 변동성 바 (VIX 전일대비 변화율)
+    v_changes = vix_tab["close"].pct_change() * 100
+    bar_colors = ["#ff5252" if c >= 0 else "#00e676" for c in v_changes.fillna(0)]
+    fig_v2.add_trace(go.Bar(
+        x=vix_tab.index, y=v_changes.abs(),
+        marker_color=bar_colors, name="일변화(%)", opacity=0.7,
+    ), row=2, col=1)
+
+    fig_v2.update_layout(
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="#0b0b1a",
+        height=480,
+        margin=dict(t=10, b=10, l=8, r=80),
+        font=dict(color="white", family="Inter"),
+        legend=dict(
+            bgcolor="#111126", bordercolor="#1e1e3a", borderwidth=1,
+            font=dict(color="#888", size=11),
+            orientation="h", x=0, y=1.02,
+        ),
+        xaxis_rangeslider_visible=False,
+        xaxis2=dict(showgrid=False, tickfont=dict(color="#444")),
+        yaxis=dict(showgrid=True, gridcolor="#1a1a30",
+                   tickfont=dict(color="#444"), zeroline=False),
+        yaxis2=dict(showgrid=False, tickfont=dict(color="#444")),
+    )
+    fig_v2.update_xaxes(showgrid=False)
+
+    st.plotly_chart(fig_v2, use_container_width=True)
+
+    # ── 52주 레인지 바 ────────────────────────────────────────────────────
+    w52h = vix_d["week52_high"]
+    w52l = vix_d["week52_low"]
+    if w52h > w52l:
+        ratio_52 = (v_price - w52l) / (w52h - w52l) * 100
+        st.markdown(f"""
+        <div style="background:#111126;border:1px solid #1e1e3a;border-radius:10px;
+                    padding:14px 18px;margin-top:4px;">
+          <div style="display:flex;justify-content:space-between;
+                      font-size:11px;color:#555;margin-bottom:6px;
+                      letter-spacing:0.8px;text-transform:uppercase;">
+            <span>52주 최저  {w52l:.2f}</span>
+            <span style="color:{v_color};font-weight:700;">
+              현재  {v_price:.2f}  ({ratio_52:.0f}%)
+            </span>
+            <span>52주 최고  {w52h:.2f}</span>
+          </div>
+          <div style="background:#1a1a2e;border-radius:4px;height:8px;position:relative;">
+            <div style="background:{v_color};height:100%;border-radius:4px;
+                        width:{ratio_52:.1f}%;"></div>
+          </div>
+        </div>
+        """, unsafe_allow_html=True)

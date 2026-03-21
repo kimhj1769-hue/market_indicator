@@ -210,6 +210,49 @@ def get_vix_history(period: str = "3mo") -> pd.DataFrame:
     return get_chart_data("^VIX", period=period)
 
 
+# ── VIX 상세 정보 (investing.com 스타일) ──────────────────────────────────
+
+def get_vix_detail() -> dict:
+    """VIX 현재가 + 시가/고저/52주 등 상세 정보."""
+    key = "vix_detail"
+    cached = _get_cached(key, ttl=60)
+    if cached:
+        return cached
+
+    result = {
+        "price": 0.0, "prev_close": 0.0, "change": 0.0, "pct": 0.0,
+        "open": 0.0, "high": 0.0, "low": 0.0,
+        "week52_high": 0.0, "week52_low": 0.0, "avg3m": 0.0,
+    }
+    try:
+        t    = yf.Ticker("^VIX")
+        d1   = t.history(period="2d",  interval="1d")
+        y1   = t.history(period="1y",  interval="1d")
+        m3   = t.history(period="3mo", interval="1d")
+
+        if len(d1) >= 2:
+            result["prev_close"] = float(d1["Close"].iloc[-2])
+            result["price"]      = float(d1["Close"].iloc[-1])
+            result["open"]       = float(d1["Open"].iloc[-1])
+            result["high"]       = float(d1["High"].iloc[-1])
+            result["low"]        = float(d1["Low"].iloc[-1])
+            result["change"]     = result["price"] - result["prev_close"]
+            result["pct"]        = result["change"] / result["prev_close"] * 100
+
+        if not y1.empty:
+            result["week52_high"] = float(y1["High"].max())
+            result["week52_low"]  = float(y1["Low"].min())
+
+        if not m3.empty:
+            result["avg3m"] = float(m3["Close"].mean())
+
+    except Exception:
+        pass
+
+    _set_cache(key, result)
+    return result
+
+
 # ── Put/Call Ratio ────────────────────────────────────────────────────────
 
 def get_put_call_ratio() -> dict:
