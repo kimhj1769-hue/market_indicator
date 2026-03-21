@@ -263,17 +263,23 @@ def get_chart_data(symbol: str, period: str = "3mo", interval: str = "1d") -> pd
         df = yf.download(symbol, period=period, interval=interval,
                          auto_adjust=True, progress=False)
         # yfinance 버전에 따라 컬럼 구조가 다름 — 안전하게 평탄화
+        _PRICE_NAMES = {"close", "open", "high", "low", "volume", "adj close"}
         if isinstance(df.columns, pd.MultiIndex):
-            _PRICE_NAMES = {"close", "open", "high", "low", "volume", "adj close"}
             lvl0 = [str(c[0]).lower() for c in df.columns]
             lvl1 = [str(c[1]).lower() for c in df.columns]
-            # 첫 번째 레벨이 가격명(close 등)이면 그대로, 아니면 두 번째 레벨 사용
+            # 첫 번째 레벨이 가격명이면 그대로, 아니면 두 번째 레벨 사용
             if any(n in _PRICE_NAMES for n in lvl0):
                 df.columns = lvl0
             else:
                 df.columns = lvl1
         else:
             df.columns = [str(c).lower() for c in df.columns]
+        # 중복 컬럼 제거 (같은 이름이 여러 개면 첫 번째만 유지)
+        df = df.loc[:, ~df.columns.duplicated()]
+        # 각 컬럼이 Series인지 확인 (혹시 남은 DataFrame 컬럼 squeeze)
+        for _col in list(df.columns):
+            if isinstance(df[_col], pd.DataFrame):
+                df[_col] = df[_col].iloc[:, 0]
         _set_cache(key, df)
         return df
     except Exception:
