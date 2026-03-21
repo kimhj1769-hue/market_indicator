@@ -321,7 +321,7 @@ if selected_ticker:
         fig_detail.update_yaxes(range=[0, 100], row=3, col=1)
 
         st.plotly_chart(fig_detail, use_container_width=True,
-                        config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": False})
+                        config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": True})
 
         # ── 통계 카드 ─────────────────────────────────────────────────
         rsi_now  = float(rsi.dropna().iloc[-1])  if not rsi.dropna().empty  else 0

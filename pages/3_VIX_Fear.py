@@ -88,7 +88,7 @@ with col_gauge:
         font={"color": "white"},
     )
     st.plotly_chart(fig_fg, use_container_width=True,
-                    config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": False})
+                    config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": True})
 
     if len(fg["history"]) > 1:
         delta = fg_val - fg["history"][1]["value"]
@@ -140,7 +140,7 @@ if fg["history"]:
         yaxis=dict(range=[0,115], showgrid=False, tickfont=dict(color="#444")),
     )
     st.plotly_chart(fig_fh, use_container_width=True,
-                    config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": False})
+                    config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": True})
 
 # ════════════════════════════════════════════════════════════════════
 # 2. Put/Call Ratio
@@ -250,7 +250,7 @@ if pc["history"]:
         )
 
     st.plotly_chart(fig_pc, use_container_width=True,
-                    config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": False})
+                    config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": True})
     st.caption("※ P/C Ratio: 오늘 SPY+QQQ 옵션 체인 기준 · 히스토리는 VIX 참고선으로 표시")
 
 # ════════════════════════════════════════════════════════════════════
@@ -379,7 +379,7 @@ if not vix_tab.empty:
                    showline=False, zeroline=False),
     )
     st.plotly_chart(fig_v, use_container_width=True,
-                    config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": False})
+                    config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": True})
 
     # 52주 레인지
     w52h = vix_d["week52_high"]

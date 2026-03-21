@@ -218,7 +218,7 @@ fig.update_yaxes(showgrid=True, gridcolor="#1a1a2e", tickfont=dict(color="#444")
 fig.update_yaxes(range=[0, 100], row=3, col=1)
 
 st.plotly_chart(fig, use_container_width=True,
-                config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": False})
+                config={"scrollZoom": False, "doubleClick": "reset+autosize", "displayModeBar": True})
 
 # ── 하단 통계 카드 ────────────────────────────────────────────────────────
 c1,c2,c3,c4,c5,c6,c7 = st.columns(7)
