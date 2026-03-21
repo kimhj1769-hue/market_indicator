@@ -4,7 +4,7 @@ import streamlit as st
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import pandas as pd
-from utils import get_fear_greed, get_vix_history, get_put_call_ratio, get_vix_detail, get_chart_data
+from utils import get_fear_greed, get_vix_history, get_put_call_ratio, get_vix_detail, get_chart_data, clear_cache
 
 st.set_page_config(page_title="VIX & Fear", page_icon="🌡️", layout="wide")
 
@@ -37,7 +37,7 @@ with col_title:
     st.markdown("## 🌡️ Fear & Greed · VIX · Put/Call")
 with col_btn:
     if st.button("⟳  Refresh", use_container_width=True):
-        st.cache_data.clear()
+        clear_cache()
         st.rerun()
 
 with st.spinner(""):
@@ -145,54 +145,31 @@ if fg["history"]:
 # ════════════════════════════════════════════════════════════════════
 st.markdown('<div class="sec-title">Put / Call Ratio (SPY + QQQ)</div>', unsafe_allow_html=True)
 
-col_pc1, col_pc2, col_pc3 = st.columns([1, 1, 2])
+# 현재값 요약 카드
+if pc["ratio"] is not None:
+    r = pc["ratio"]
+    pc_color = "#00e5ff" if r<0.7 else "#00e676" if r<0.9 else "#ffd600" if r<1.1 else "#ff9100" if r<1.3 else "#ff5252"
+    chg_col_pc = "#ff5252" if r >= 1.0 else "#00e676"
+else:
+    r = 0.0
+    pc_color = "#888"
 
-with col_pc1:
-    if pc["ratio"] is not None:
-        r = pc["ratio"]
-        pc_color = "#00e5ff" if r<0.7 else "#00e676" if r<0.9 else "#ffd600" if r<1.1 else "#ff9100" if r<1.3 else "#ff5252"
-        fig_pc = go.Figure(go.Indicator(
-            mode="gauge+number",
-            value=r,
-            number={"font": {"color": pc_color, "size": 52}, "valueformat": ".3f"},
-            title={"text": f"Put/Call Ratio<br><span style='font-size:13px;color:{pc_color}'>{pc['label']}</span>",
-                   "font": {"color": "#ccc", "size": 14}},
-            gauge={
-                "axis": {"range": [0, 2.0], "tickcolor": "#333", "tickfont": {"color": "#444"}, "dtick": 0.5},
-                "bar": {"color": pc_color, "thickness": 0.25},
-                "bgcolor": "#0d0d1e", "borderwidth": 0,
-                "steps": [
-                    {"range": [0.0, 0.7], "color": "#002a2a"},
-                    {"range": [0.7, 0.9], "color": "#002a0f"},
-                    {"range": [0.9, 1.1], "color": "#2a2500"},
-                    {"range": [1.1, 1.3], "color": "#2a1000"},
-                    {"range": [1.3, 2.0], "color": "#2a0007"},
-                ],
-                "threshold": {"line": {"color": "#fff", "width": 2}, "thickness": 0.85, "value": r},
-            },
-        ))
-        fig_pc.update_layout(
-            paper_bgcolor="#111126", plot_bgcolor="#111126",
-            height=300, margin=dict(t=120, b=50, l=20, r=20),
-            font={"color": "white"},
-        )
-        st.plotly_chart(fig_pc, use_container_width=True)
-    else:
-        st.info("장 외 시간이거나 데이터 로딩 중입니다.")
-
-with col_pc2:
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown(f'<div class="stat-box" style="border-left:3px solid #ff5252;margin-bottom:10px"><div class="stat-val" style="color:#ff5252">{pc["put_vol"]:,}</div><div class="stat-lbl">Put 거래량</div></div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="stat-box" style="border-left:3px solid #00e676"><div class="stat-val" style="color:#00e676">{pc["call_vol"]:,}</div><div class="stat-lbl">Call 거래량</div></div>', unsafe_allow_html=True)
-
-with col_pc3:
-    st.markdown("<br>", unsafe_allow_html=True)
+col_pc_a, col_pc_b, col_pc_c, col_pc_d = st.columns([1, 1, 1, 2])
+with col_pc_a:
+    ratio_str = f"{r:.3f}" if pc["ratio"] is not None else "N/A"
+    st.markdown(f'<div class="stat-box" style="border-top:3px solid {pc_color};"><div class="stat-val" style="color:{pc_color};font-size:28px;">{ratio_str}</div><div class="stat-lbl">P/C Ratio</div></div>', unsafe_allow_html=True)
+with col_pc_b:
+    st.markdown(f'<div class="stat-box" style="border-top:3px solid {pc_color};"><div class="stat-val" style="color:{pc_color};font-size:16px;">{pc["label"]}</div><div class="stat-lbl">심리</div></div>', unsafe_allow_html=True)
+with col_pc_c:
+    st.markdown(f'<div class="stat-box" style="border-left:3px solid #ff5252;margin-bottom:6px"><div class="stat-val" style="color:#ff5252;font-size:16px;">{pc["put_vol"]:,}</div><div class="stat-lbl">Put 거래량</div></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="stat-box" style="border-left:3px solid #00e676;"><div class="stat-val" style="color:#00e676;font-size:16px;">{pc["call_vol"]:,}</div><div class="stat-lbl">Call 거래량</div></div>', unsafe_allow_html=True)
+with col_pc_d:
     guide = [
-        ("< 0.7",  "Extreme Greed", "#00e5ff", "콜 매수 급증, 시장 과열 신호"),
-        ("0.7–0.9","Greed",         "#00e676", "낙관적 심리, 콜 옵션 우세"),
-        ("0.9–1.1","Neutral",       "#ffd600", "균형 상태, 방향성 불확실"),
-        ("1.1–1.3","Fear",          "#ff9100", "풋 증가, 하락 헤지 수요 증가"),
-        ("> 1.3",  "Extreme Fear",  "#ff5252", "강한 패닉 헤지, 반등 가능성"),
+        ("< 0.7",  "Extreme Greed", "#00e5ff", "콜 매수 급증, 시장 과열"),
+        ("0.7–0.9","Greed",         "#00e676", "낙관적 심리, 콜 우세"),
+        ("0.9–1.1","Neutral",       "#ffd600", "균형 상태"),
+        ("1.1–1.3","Fear",          "#ff9100", "풋 증가, 헤지 수요"),
+        ("> 1.3",  "Extreme Fear",  "#ff5252", "강한 패닉 헤지"),
     ]
     cur_lbl = pc["label"] if pc["ratio"] else ""
     for rng, lbl, color, desc in guide:
@@ -201,11 +178,77 @@ with col_pc3:
         bdr = f"border:1.5px solid {color}" if is_cur else f"border-left:3px solid {color}"
         mark = f' <span style="color:{color};font-weight:800">◀</span>' if is_cur else ""
         st.markdown(
-            f'<div style="padding:9px 14px;margin:5px 0;background:{bg};{bdr};border-radius:9px;">'
-            f'<span style="color:{color};font-weight:700">{rng} — {lbl}</span>{mark}'
-            f'<br><span style="color:#555;font-size:12px">{desc}</span></div>',
+            f'<div style="padding:7px 12px;margin:3px 0;background:{bg};{bdr};border-radius:8px;">'
+            f'<span style="color:{color};font-weight:700;font-size:13px;">{rng} — {lbl}</span>{mark}'
+            f'<br><span style="color:#555;font-size:11px;">{desc}</span></div>',
             unsafe_allow_html=True,
         )
+
+# P/C 선그래프 (VIX 대리 히스토리 + 현재값 강조)
+if pc["history"]:
+    hist_pc = pd.DataFrame(pc["history"])
+
+    fig_pc = go.Figure()
+
+    # VIX 선 (참고용, 연회색)
+    fig_pc.add_trace(go.Scatter(
+        x=hist_pc["date"], y=hist_pc["vix"],
+        mode="lines",
+        line=dict(color="rgba(150,150,200,0.35)", width=1.5, dash="dot"),
+        name="VIX (참고)",
+        yaxis="y2",
+        hovertemplate="%{x|%Y-%m-%d}<br>VIX: <b>%{y:.2f}</b><extra></extra>",
+    ))
+
+    # 기준선
+    for y_val, lbl, lc in [(0.7, "Greed 0.7", "#00e676"), (0.9, "0.9", "#69f0ae"),
+                            (1.0, "중립 1.0", "#ffd600"), (1.3, "Fear 1.3", "#ff5252")]:
+        fig_pc.add_hline(
+            y=y_val, line_dash="dash", line_color=lc, line_width=1, opacity=0.5,
+            annotation_text=lbl, annotation_font_color=lc,
+            annotation_position="right",
+        )
+
+    # 현재 P/C ratio 수평선 (강조)
+    if pc["ratio"] is not None:
+        fig_pc.add_hline(
+            y=pc["ratio"], line_dash="solid", line_color=pc_color, line_width=2, opacity=0.9,
+            annotation_text=f"  현재 {pc['ratio']:.3f}",
+            annotation_font_color=pc_color, annotation_font_size=13,
+            annotation_position="right",
+        )
+
+    fig_pc.update_layout(
+        paper_bgcolor="#111126", plot_bgcolor="#0e0e1e",
+        height=320, margin=dict(t=16, b=30, l=8, r=100),
+        font=dict(color="white", family="Inter"),
+        legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(color="#888", size=11),
+                    orientation="h", x=0, y=1.06),
+        hovermode="x unified",
+        xaxis=dict(showgrid=False, tickfont=dict(color="#555")),
+        yaxis=dict(
+            title="P/C Ratio", range=[0, 2.2], showgrid=True, gridcolor="#1a1a2e",
+            tickfont=dict(color="#555"), zeroline=False,
+        ),
+        yaxis2=dict(
+            title="VIX", overlaying="y", side="left", showgrid=False,
+            tickfont=dict(color="#333"), zeroline=False, showticklabels=False,
+        ),
+    )
+
+    # 현재 P/C 값 레이블
+    if pc["ratio"] is not None:
+        fig_pc.add_annotation(
+            x=hist_pc["date"].iloc[-1],
+            y=pc["ratio"],
+            text=f"  <b>{pc['ratio']:.3f}</b>",
+            showarrow=False, xanchor="left",
+            font=dict(color=pc_color, size=13),
+            bgcolor="#111126", bordercolor=pc_color, borderwidth=1, borderpad=4,
+        )
+
+    st.plotly_chart(fig_pc, use_container_width=True)
+    st.caption("※ P/C Ratio: 오늘 SPY+QQQ 옵션 체인 기준 · 히스토리는 VIX 참고선으로 표시")
 
 # ════════════════════════════════════════════════════════════════════
 # 3. VIX — investing.com 스타일
@@ -276,52 +319,62 @@ sel_period = st.radio("기간", list(period_opts.keys()), index=1,
                        horizontal=True, label_visibility="collapsed")
 vix_tab = get_chart_data("^VIX", period=period_opts[sel_period], interval="1d")
 
-# 캔들차트
+# ── investing.com 스타일 선그래프 ─────────────────────────────────────────
 if not vix_tab.empty:
-    fig_v = make_subplots(rows=2, cols=1, shared_xaxes=True,
-                          vertical_spacing=0.02, row_heights=[0.78, 0.22])
+    cur_close = vix_tab["close"].iloc[-1]
 
-    fig_v.add_trace(go.Candlestick(
-        x=vix_tab.index, open=vix_tab["open"], high=vix_tab["high"],
-        low=vix_tab["low"], close=vix_tab["close"],
-        increasing_line_color="#ff5252", increasing_fillcolor="#ff5252",
-        decreasing_line_color="#00e676", decreasing_fillcolor="#00e676",
+    fig_v = go.Figure()
+
+    # 면적 채움 선그래프 (연한 파란색 — investing.com 스타일)
+    fig_v.add_trace(go.Scatter(
+        x=vix_tab.index, y=vix_tab["close"],
+        mode="lines",
+        line=dict(color="#5b9cf6", width=2),
+        fill="tozeroy",
+        fillcolor="rgba(91,156,246,0.12)",
         name="VIX",
-    ), row=1, col=1)
+        hovertemplate="%{x|%Y-%m-%d}<br>VIX: <b>%{y:.2f}</b><extra></extra>",
+    ))
 
+    # MA20
     if len(vix_tab) >= 20:
         ma20 = vix_tab["close"].rolling(20).mean()
-        std  = vix_tab["close"].rolling(20).std()
-        fig_v.add_trace(go.Scatter(x=vix_tab.index, y=ma20,
-            line=dict(color="#4f8ef7", width=1.5), name="MA20", opacity=0.8), row=1, col=1)
-        fig_v.add_trace(go.Scatter(x=vix_tab.index, y=ma20+2*std,
-            line=dict(color="#cc44ff", width=1, dash="dot"), name="BB+2σ", opacity=0.5), row=1, col=1)
-        fig_v.add_trace(go.Scatter(x=vix_tab.index, y=ma20-2*std,
-            line=dict(color="#cc44ff", width=1, dash="dot"), name="BB-2σ",
-            fill="tonexty", fillcolor="rgba(204,68,255,0.04)", opacity=0.5), row=1, col=1)
+        fig_v.add_trace(go.Scatter(
+            x=vix_tab.index, y=ma20,
+            mode="lines", line=dict(color="#ff9100", width=1.5, dash="dot"),
+            name="MA20", opacity=0.8,
+            hovertemplate="MA20: %{y:.2f}<extra></extra>",
+        ))
 
-    for y_val, lbl, lc in [(20,"주의 20","#ffd600"),(30,"공포 30","#ff5252")]:
-        fig_v.add_hline(y=y_val, line_dash="dot", line_color=lc, opacity=0.5,
-                        annotation_text=lbl, annotation_font_color=lc,
-                        annotation_position="right", row=1, col=1)
+    # 기준선
+    for y_val, lbl, lc in [(20, "주의 20", "#ffd600"), (30, "공포 30", "#ff5252")]:
+        fig_v.add_hline(
+            y=y_val, line_dash="dash", line_color=lc, line_width=1, opacity=0.6,
+            annotation_text=lbl, annotation_font_color=lc,
+            annotation_position="right",
+        )
 
-    v_changes = vix_tab["close"].pct_change() * 100
-    fig_v.add_trace(go.Bar(
-        x=vix_tab.index, y=v_changes.abs(),
-        marker_color=["#ff5252" if c>=0 else "#00e676" for c in v_changes.fillna(0)],
-        name="일변화%", opacity=0.7,
-    ), row=2, col=1)
+    # 현재값 레이블 (오른쪽 끝 강조)
+    fig_v.add_annotation(
+        x=vix_tab.index[-1], y=cur_close,
+        text=f"  <b>{cur_close:.2f}</b>",
+        showarrow=False, xanchor="left",
+        font=dict(color=v_color, size=13, family="Inter"),
+        bgcolor="#111126", bordercolor=v_color, borderwidth=1, borderpad=4,
+    )
 
     fig_v.update_layout(
         paper_bgcolor="#111126", plot_bgcolor="#0e0e1e",
-        height=480, margin=dict(t=10, b=10, l=8, r=80),
+        height=400, margin=dict(t=10, b=30, l=8, r=90),
         font=dict(color="white", family="Inter"),
-        legend=dict(bgcolor="#111126", bordercolor="#1e1e3a", borderwidth=1,
-                    font=dict(color="#888", size=11), orientation="h", x=0, y=1.02),
-        xaxis_rangeslider_visible=False,
+        legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(color="#888", size=11),
+                    orientation="h", x=0, y=1.04),
+        hovermode="x unified",
+        xaxis=dict(showgrid=False, tickfont=dict(color="#555"), showline=False,
+                   rangeslider=dict(visible=False)),
+        yaxis=dict(showgrid=True, gridcolor="#1a1a2e", tickfont=dict(color="#555"),
+                   showline=False, zeroline=False),
     )
-    fig_v.update_xaxes(showgrid=False, tickfont=dict(color="#444"))
-    fig_v.update_yaxes(showgrid=True, gridcolor="#1a1a30", tickfont=dict(color="#444"))
     st.plotly_chart(fig_v, use_container_width=True)
 
     # 52주 레인지

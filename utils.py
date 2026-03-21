@@ -23,6 +23,11 @@ def _set_cache(key: str, val):
     _cache[key] = (val, datetime.now())
 
 
+def clear_cache():
+    """커스텀 캐시 전체 초기화 (Refresh 버튼용)."""
+    _cache.clear()
+
+
 # ── 주요 지수 현재가 ─────────────────────────────────────────────────────
 
 def get_market_overview() -> dict:
@@ -257,7 +262,18 @@ def get_chart_data(symbol: str, period: str = "3mo", interval: str = "1d") -> pd
     try:
         df = yf.download(symbol, period=period, interval=interval,
                          auto_adjust=True, progress=False)
-        df.columns = [c.lower() for c in df.columns]
+        # yfinance 버전에 따라 컬럼 구조가 다름 — 안전하게 평탄화
+        if isinstance(df.columns, pd.MultiIndex):
+            _PRICE_NAMES = {"close", "open", "high", "low", "volume", "adj close"}
+            lvl0 = [str(c[0]).lower() for c in df.columns]
+            lvl1 = [str(c[1]).lower() for c in df.columns]
+            # 첫 번째 레벨이 가격명(close 등)이면 그대로, 아니면 두 번째 레벨 사용
+            if any(n in _PRICE_NAMES for n in lvl0):
+                df.columns = lvl0
+            else:
+                df.columns = lvl1
+        else:
+            df.columns = [str(c).lower() for c in df.columns]
         _set_cache(key, df)
         return df
     except Exception:

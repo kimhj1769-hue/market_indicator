@@ -4,7 +4,7 @@ import streamlit as st
 import plotly.graph_objects as go
 import pandas as pd
 from datetime import datetime
-from utils import get_market_overview, get_fear_greed, get_chart_data
+from utils import get_market_overview, get_fear_greed, get_chart_data, clear_cache
 
 st.set_page_config(page_title="Market Dashboard", page_icon="📊",
                    layout="wide", initial_sidebar_state="collapsed")
@@ -76,7 +76,7 @@ with col_h:
 with col_btn:
     st.markdown("<br><br>", unsafe_allow_html=True)
     if st.button("⟳  Refresh", use_container_width=True):
-        st.cache_data.clear()
+        clear_cache()
         st.rerun()
 
 # 데이터
@@ -210,7 +210,7 @@ for col, sym, label, color, fmt in [
     with col:
         df = get_chart_data(sym, period="1mo", interval="1d")
         if not df.empty:
-            pct  = (df["close"].iloc[-1] / df["close"].iloc[0] - 1) * 100
+            pct  = float((df["close"].iloc[-1] / df["close"].iloc[0] - 1) * 100)
             lc   = color if pct >= 0 else "#ff5252"
             fill = f"rgba({','.join(str(int(color.lstrip('#')[i:i+2],16)) for i in (0,2,4))},0.08)"
             fig  = go.Figure()
