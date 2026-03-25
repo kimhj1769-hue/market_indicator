@@ -1,6 +1,7 @@
 """Home.py — Market Dashboard 메인"""
 
 import streamlit as st
+import streamlit.components.v1 as components
 import plotly.graph_objects as go
 import pandas as pd
 from datetime import datetime
@@ -62,6 +63,28 @@ st.markdown("""
 <meta name="application-name" content="marketindicator">
 <meta name="apple-mobile-web-app-capable" content="yes">
 """, unsafe_allow_html=True)
+
+# 5분 이상 백그라운드 후 돌아오면 자동 새로고침 (sleep 화면 방지)
+components.html("""
+<script>
+(function() {
+  var hiddenAt = null;
+  // 부모 창 기준으로 이벤트 등록
+  var target = window.parent ? window.parent.document : document;
+  target.addEventListener('visibilitychange', function() {
+    if (target.visibilityState === 'hidden') {
+      hiddenAt = Date.now();
+    } else if (target.visibilityState === 'visible' && hiddenAt) {
+      var elapsed = Date.now() - hiddenAt;
+      if (elapsed > 5 * 60 * 1000) {
+        window.parent.location.reload();
+      }
+      hiddenAt = null;
+    }
+  });
+})();
+</script>
+""", height=0)
 
 # 날짜
 _now = datetime.now()
