@@ -12,3 +12,7 @@ build/
 *.egg-info/
 .pytest_cache/
 .mypy_cache/
+*.pem
+*.csv
+.claude/rootkey.csv
+.claude/settings.local.json
