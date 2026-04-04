@@ -4,6 +4,7 @@ import requests
 import pandas as pd
 import yfinance as yf
 from datetime import datetime, timedelta
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 # ── 캐시 (같은 실행 중 중복 API 호출 방지) ──────────────────────────────
@@ -28,10 +29,67 @@ def clear_cache():
     _cache.clear()
 
 
+# ── 색상 유틸리티 ────────────────────────────────────────────────────────────
+
+def get_fg_color_and_emoji(value: float) -> tuple:
+    """Fear & Greed 값 → (색상코드, 이모지텍스트)"""
+    if value <= 25:   return "#ff5252", "😱 Extreme Fear"
+    elif value <= 45: return "#ff9100", "😨 Fear"
+    elif value <= 55: return "#ffd600", "😐 Neutral"
+    elif value <= 75: return "#00e676", "😊 Greed"
+    else:             return "#00e5ff", "🤑 Extreme Greed"
+
+
+def get_vix_color_and_status(value: float) -> tuple:
+    """VIX 값 → (색상코드, 상태텍스트)"""
+    if value < 15:   return "#00e676", "안정"
+    elif value < 20: return "#69f0ae", "낮음"
+    elif value < 25: return "#ffd600", "보통"
+    elif value < 30: return "#ff9100", "주의"
+    elif value < 40: return "#ff5252", "공포"
+    else:            return "#ff1744", "극도의 공포"
+
+
+def hex_to_rgba(hex_color: str, alpha: float = 1.0) -> str:
+    """Hex → rgba() 문자열 (매번 파싱 대신 함수 호출)"""
+    hex_color = hex_color.lstrip('#')
+    r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
+    return f"rgba({r},{g},{b},{alpha})"
+
+
 # ── 주요 지수 현재가 ─────────────────────────────────────────────────────
 
+def _fetch_single_ticker(name: str, sym: str) -> tuple:
+    """단일 지수 fetch (병렬 실행용)."""
+    try:
+        ticker = yf.Ticker(sym)
+        hist = ticker.history(period="2d", interval="1d")
+        if len(hist) < 2:
+            hist = ticker.history(period="5d", interval="1d").tail(2)
+        if len(hist) >= 2:
+            prev  = float(hist["Close"].iloc[-2])
+            cur   = float(hist["Close"].iloc[-1])
+            chg   = cur - prev
+            pct   = chg / prev * 100
+        elif len(hist) == 1:
+            cur  = float(hist["Close"].iloc[-1])
+            chg  = 0.0
+            pct  = 0.0
+        else:
+            return None
+
+        return (name, {
+            "price":   cur,
+            "change":  chg,
+            "pct":     pct,
+            "symbol":  sym,
+        })
+    except Exception:
+        return None
+
+
 def get_market_overview() -> dict:
-    """BTC, VIX, 나스닥, S&P500 현재가 + 등락률 반환."""
+    """BTC, VIX, 나스닥, S&P500 현재가 + 등락률 반환 (병렬 fetch)."""
     key = "market_overview"
     cached = _get_cached(key, ttl=60)
     if cached:
@@ -46,32 +104,14 @@ def get_market_overview() -> dict:
     }
 
     result = {}
-    for name, sym in symbols.items():
-        try:
-            ticker = yf.Ticker(sym)
-            hist   = ticker.history(period="2d", interval="1d")
-            if len(hist) < 2:
-                hist = ticker.history(period="5d", interval="1d").tail(2)
-            if len(hist) >= 2:
-                prev  = float(hist["Close"].iloc[-2])
-                cur   = float(hist["Close"].iloc[-1])
-                chg   = cur - prev
-                pct   = chg / prev * 100
-            elif len(hist) == 1:
-                cur  = float(hist["Close"].iloc[-1])
-                chg  = 0.0
-                pct  = 0.0
-            else:
-                continue
-
-            result[name] = {
-                "price":   cur,
-                "change":  chg,
-                "pct":     pct,
-                "symbol":  sym,
-            }
-        except Exception:
-            pass
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        futures = {executor.submit(_fetch_single_ticker, name, sym): name
+                   for name, sym in symbols.items()}
+        for future in as_completed(futures):
+            res = future.result()
+            if res:
+                name, data = res
+                result[name] = data
 
     _set_cache(key, result)
     return result

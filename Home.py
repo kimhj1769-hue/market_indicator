@@ -5,7 +5,8 @@ import streamlit.components.v1 as components
 import plotly.graph_objects as go
 import pandas as pd
 from datetime import datetime
-from utils import get_market_overview, get_fear_greed, get_chart_data, clear_cache
+from utils import (get_market_overview, get_fear_greed, get_chart_data, clear_cache,
+                   get_fg_color_and_emoji, get_vix_color_and_status, hex_to_rgba)
 
 st.set_page_config(page_title="marketindicator", page_icon="📊",
                    layout="wide", initial_sidebar_state="collapsed")
@@ -158,11 +159,7 @@ col_fg, col_vix = st.columns(2)
 with col_fg:
     fg_val = fg["value"]
     fg_lbl = fg["label"]
-    if fg_val <= 25:   fg_color, fg_emoji = "#ff5252", "😱 Extreme Fear"
-    elif fg_val <= 45: fg_color, fg_emoji = "#ff9100", "😨 Fear"
-    elif fg_val <= 55: fg_color, fg_emoji = "#ffd600", "😐 Neutral"
-    elif fg_val <= 75: fg_color, fg_emoji = "#00e676", "😊 Greed"
-    else:              fg_color, fg_emoji = "#00e5ff", "🤑 Extreme Greed"
+    fg_color, fg_emoji = get_fg_color_and_emoji(fg_val)
 
     fig_fg = go.Figure(go.Indicator(
         mode="gauge+number",
@@ -195,12 +192,7 @@ with col_fg:
 # VIX 게이지
 with col_vix:
     vix_val = market.get("VIX", {}).get("price", 20)
-    if vix_val < 15:   vix_color, vix_status = "#00e676", "안정"
-    elif vix_val < 20: vix_color, vix_status = "#69f0ae", "낮음"
-    elif vix_val < 25: vix_color, vix_status = "#ffd600", "보통"
-    elif vix_val < 30: vix_color, vix_status = "#ff9100", "주의"
-    elif vix_val < 40: vix_color, vix_status = "#ff5252", "공포"
-    else:              vix_color, vix_status = "#ff1744", "극도의 공포"
+    vix_color, vix_status = get_vix_color_and_status(vix_val)
 
     fig_vix = go.Figure(go.Indicator(
         mode="gauge+number",
@@ -246,7 +238,7 @@ for col, sym, label, color, fmt in [
         if not df.empty:
             pct  = float((df["close"].iloc[-1] / df["close"].iloc[0] - 1) * 100)
             lc   = color if pct >= 0 else "#ff5252"
-            fill = f"rgba({','.join(str(int(color.lstrip('#')[i:i+2],16)) for i in (0,2,4))},0.08)"
+            fill = hex_to_rgba(color, 0.08)
             fig  = go.Figure()
             fig.add_trace(go.Scatter(
                 x=df.index, y=df["close"], mode="lines",

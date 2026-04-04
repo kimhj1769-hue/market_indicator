@@ -1,0 +1,17 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.git/
+.gitignore
+.claude/
+.streamlit/secrets.toml
+.devcontainer/
+.DS_Store
+*.log
+.pytest_cache/
+.coverage
+htmlcov/
