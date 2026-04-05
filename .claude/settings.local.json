@@ -6,7 +6,11 @@
       "Bash(cd \"C:\\\\Users\\\\Kim.HJ\\\\Desktop\\\\market-dashboard\" && venv/Scripts/streamlit.exe config show 2>&1 | grep -A5 -i \"disconnect\\\\|session\\\\|ttl\\\\|inactive\\\\|sleep\\\\|timeout\")",
       "Bash(schtasks /query /tn \"MarketDashboard\" 2>&1)",
       "Bash(powershell -Command \"\n\\\\$action = New-ScheduledTaskAction -Execute 'C:\\\\Users\\\\Kim.HJ\\\\Desktop\\\\market-dashboard\\\\start_dashboard.bat'\n\\\\$trigger = New-ScheduledTaskTrigger -AtLogOn -User \\\\$env:USERNAME\n\\\\$settings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit 0 -RestartCount 3 -RestartInterval \\(New-TimeSpan -Minutes 1\\)\n\\\\$principal = New-ScheduledTaskPrincipal -UserId \\\\$env:USERNAME -LogonType Interactive -RunLevel Highest\nRegister-ScheduledTask -TaskName 'MarketDashboard' -Action \\\\$action -Trigger \\\\$trigger -Settings \\\\$settings -Principal \\\\$principal -Force\n\" 2>&1)",
-      "Bash(powershell -Command \"\n\\\\$startupFolder = [System.Environment]::GetFolderPath\\('Startup'\\)\nWrite-Output \\\\$startupFolder\n\")"
+      "Bash(powershell -Command \"\n\\\\$startupFolder = [System.Environment]::GetFolderPath\\('Startup'\\)\nWrite-Output \\\\$startupFolder\n\")",
+      "Bash(bash setup_ec2.sh)",
+      "Bash(choco install:*)",
+      "Bash(git add:*)",
+      "Bash(rm -f DEPLOYMENT_SUMMARY.md DEPLOY_NOW.md DEPLOY_OPTIONS.md EC2_DEPLOY_GUIDE.md LOCAL_DEV.md market_dashboard_qr.png market-dashboard-key.pem && rm -rf .devcontainer && echo \"삭제 완료\")"
     ]
   }
 }
