@@ -10,7 +10,17 @@
       "Bash(bash setup_ec2.sh)",
       "Bash(choco install:*)",
       "Bash(git add:*)",
-      "Bash(rm -f DEPLOYMENT_SUMMARY.md DEPLOY_NOW.md DEPLOY_OPTIONS.md EC2_DEPLOY_GUIDE.md LOCAL_DEV.md market_dashboard_qr.png market-dashboard-key.pem && rm -rf .devcontainer && echo \"삭제 완료\")"
+      "Bash(rm -f DEPLOYMENT_SUMMARY.md DEPLOY_NOW.md DEPLOY_OPTIONS.md EC2_DEPLOY_GUIDE.md LOCAL_DEV.md market_dashboard_qr.png market-dashboard-key.pem && rm -rf .devcontainer && echo \"삭제 완료\")",
+      "Bash(netstat -ano | grep -E \"\\(8501|8502|3000\\)\" || echo \"해당 포트에서 실행 중인 프로세스 없음\")",
+      "Bash(timeout 5 streamlit run Home.py 2>&1 | head -50)",
+      "Bash(taskkill /pid 4708 /f && sleep 2 && echo \"✅ Streamlit 종료 완료\")",
+      "Bash(kill -9 4708 2>/dev/null || kill -9 245 2>/dev/null; sleep 2; echo \"✅ 프로세스 종료 완료\")",
+      "Bash(aws ec2:*)",
+      "Bash(ls -la *.pem 2>/dev/null || echo \"PEM 파일 찾기...\" && find . -name \"*.pem\" -type f 2>/dev/null | head -5)",
+      "Bash(chmod 400 market_indicator.pem && ssh -i market_indicator.pem -o StrictHostKeyChecking=no ec2-user@3.226.251.235 << 'EOF'\ncd /home/ec2-user\ngit clone https://github.com/kimhj1769-hue/market_indicator.git apps 2>/dev/null || \\(cd apps && git pull origin main\\)\ncd apps\nbash deploy.sh https://github.com/kimhj1769-hue/market_indicator.git\nEOF)",
+      "Bash(aws ssm:*)",
+      "Bash(aws ec2-instance-connect:*)",
+      "Bash(python -c \"\nfrom utils import get_market_overview, get_fear_greed\nprint\\('=== Market Overview ==='\\)\ntry:\n    result = get_market_overview\\(\\)\n    print\\(result\\)\nexcept Exception as e:\n    print\\(f'Error: {type\\(e\\).__name__}: {e}'\\)\n\nprint\\('\\\\n=== Fear & Greed ==='\\)\ntry:\n    result = get_fear_greed\\(\\)\n    print\\(result\\)\nexcept Exception as e:\n    print\\(f'Error: {type\\(e\\).__name__}: {e}'\\)\n\" 2>&1)"
     ]
   }
 }

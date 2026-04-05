@@ -27,7 +27,7 @@ if [ -z "$USERNAME" ]; then
     exit 1
 fi
 
-REPO_NAME="market-dashboard"
+REPO_NAME="market_indicator"
 REPO_URL="https://github.com/${USERNAME}/${REPO_NAME}.git"
 
 echo ""

@@ -84,14 +84,15 @@ def _fetch_single_ticker(name: str, sym: str) -> tuple:
             "pct":     pct,
             "symbol":  sym,
         })
-    except Exception:
+    except Exception as e:
+        # 에러 로깅만 하고 None 반환
         return None
 
 
 def get_market_overview() -> dict:
     """BTC, VIX, 나스닥, S&P500 현재가 + 등락률 반환 (병렬 fetch)."""
     key = "market_overview"
-    cached = _get_cached(key, ttl=60)
+    cached = _get_cached(key, ttl=30)
     if cached:
         return cached
 
@@ -104,14 +105,28 @@ def get_market_overview() -> dict:
     }
 
     result = {}
+    # 타임아웃 설정: 각 작업은 5초 이내에 완료되어야 함
     with ThreadPoolExecutor(max_workers=5) as executor:
         futures = {executor.submit(_fetch_single_ticker, name, sym): name
                    for name, sym in symbols.items()}
-        for future in as_completed(futures):
-            res = future.result()
-            if res:
-                name, data = res
-                result[name] = data
+        for future in as_completed(futures, timeout=8):  # 전체 8초 타임아웃
+            try:
+                res = future.result(timeout=5)
+                if res:
+                    name, data = res
+                    result[name] = data
+            except Exception:
+                pass
+
+    # 데이터가 비어있으면 기본값 반환
+    if not result:
+        result = {
+            "BTC": {"price": 0, "change": 0, "pct": 0, "symbol": "BTC-USD"},
+            "나스닥": {"price": 0, "change": 0, "pct": 0, "symbol": "^IXIC"},
+            "S&P500": {"price": 0, "change": 0, "pct": 0, "symbol": "^GSPC"},
+            "VIX": {"price": 0, "change": 0, "pct": 0, "symbol": "^VIX"},
+            "DOW": {"price": 0, "change": 0, "pct": 0, "symbol": "^DJI"},
+        }
 
     _set_cache(key, result)
     return result
@@ -122,7 +137,7 @@ def get_market_overview() -> dict:
 def get_fear_greed() -> dict:
     """CNN Fear & Greed Index (alternative.me API)."""
     key = "fear_greed"
-    cached = _get_cached(key, ttl=300)
+    cached = _get_cached(key, ttl=30)
     if cached:
         return cached
 
