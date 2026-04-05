@@ -20,11 +20,11 @@
 
 ```bash
 # GitHub 저장소 만들기 (또는 기존 저장소 사용)
-cd C:\Users\Kim.HJ\Desktop\market-dashboard
+cd C:\Users\Kim.HJ\Desktop\market-indicator
 git init
 git add .
 git commit -m "Initial commit"
-git remote add origin https://github.com/YOUR_USERNAME/market-dashboard.git
+git remote add origin https://github.com/YOUR_USERNAME/market_indicator.git
 git push -u origin main
 ```
 
@@ -41,8 +41,8 @@ ssh -i your-key.pem ubuntu@your-ec2-public-ip
 ```bash
 # 코드 클론
 cd ~
-git clone https://github.com/YOUR_USERNAME/market-dashboard.git
-cd market-dashboard
+git clone https://github.com/YOUR_USERNAME/market_indicator.git
+cd market-indicator
 
 # 배포 스크립트 실행 권한 설정
 chmod +x deploy.sh
@@ -63,8 +63,8 @@ sudo apt-get update
 sudo apt-get install -y python3.11 python3.11-venv python3-pip git
 
 # 2. 앱 디렉토리 생성
-mkdir -p ~/apps/market-dashboard
-cd ~/apps/market-dashboard
+mkdir -p ~/apps/market-indicator
+cd ~/apps/market-indicator
 
 # 3. 코드 클론 (또는 pull)
 git clone <YOUR_REPO_URL> .
@@ -94,14 +94,14 @@ sudo nano /etc/systemd/system/streamlit-dashboard.service
 **다음 내용 입력:**
 ```ini
 [Unit]
-Description=Streamlit Market Dashboard
+Description=Streamlit Market Indicator
 After=network.target
 
 [Service]
 Type=simple
 User=ubuntu
-WorkingDirectory=/home/ubuntu/apps/market-dashboard
-ExecStart=/home/ubuntu/apps/market-dashboard/venv/bin/streamlit run Home.py --server.port 8501 --server.address 0.0.0.0
+WorkingDirectory=/home/ubuntu/apps/market-indicator
+ExecStart=/home/ubuntu/apps/market-indicator/venv/bin/streamlit run Home.py --server.port 8501 --server.address 0.0.0.0
 Restart=always
 RestartSec=10
 
@@ -132,7 +132,7 @@ HTTPS 및 커스텀 도메인 사용 시:
 ```bash
 sudo apt-get install -y nginx
 
-sudo nano /etc/nginx/sites-available/market-dashboard
+sudo nano /etc/nginx/sites-available/market-indicator
 ```
 
 **설정 내용:**
@@ -163,7 +163,7 @@ server {
 
 ### Nginx 활성화
 ```bash
-sudo ln -s /etc/nginx/sites-available/market-dashboard /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/market-indicator /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl restart nginx
 ```
@@ -223,7 +223,7 @@ sudo systemctl stop streamlit-dashboard
 ## 10. 코드 업데이트
 
 ```bash
-cd ~/apps/market-dashboard
+cd ~/apps/market-indicator
 git pull origin main
 sudo systemctl restart streamlit-dashboard
 ```
