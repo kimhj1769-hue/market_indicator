@@ -5,7 +5,6 @@ enableXsrfProtection = true
 port = 8501
 address = "0.0.0.0"
 disconnectedSessionTTL = 3600
-websocketPingInterval = 30
 maxUploadSize = 200
 
 [browser]
