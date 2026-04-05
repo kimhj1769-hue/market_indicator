@@ -11,7 +11,7 @@ APP_DIR="/home/ubuntu/apps/market-indicator"
 # 1. 시스템 업데이트
 echo "[1] 시스템 패키지 업데이트..."
 sudo apt-get update
-sudo apt-get install -y python3.11 python3.11-venv python3-pip git
+sudo apt-get install -y python3 python3-venv python3-pip git
 
 # 2. 앱 디렉토리 설정
 echo "[2] 앱 디렉토리 설정..."
@@ -31,7 +31,7 @@ fi
 # 3. 가상환경 설정
 echo "[3] Python 가상환경 설정..."
 if [ ! -d "venv" ]; then
-    python3.11 -m venv venv
+    python3 -m venv venv
 fi
 source venv/bin/activate
 pip install --upgrade pip
