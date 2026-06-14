@@ -135,30 +135,52 @@ def get_market_overview() -> dict:
 # ── Fear & Greed Index ────────────────────────────────────────────────────
 
 def get_fear_greed() -> dict:
-    """CNN Fear & Greed Index (alternative.me API)."""
+    """CNN Fear & Greed Index (미국 주식시장).
+
+    CNN 공식 dataviz API에서 주식시장 공포·탐욕 지수를 가져온다.
+    (이전에는 alternative.me 의 '암호화폐' 지수를 잘못 사용 중이었음)
+    CNN은 봇 차단이 있어 브라우저 흉내 헤더가 반드시 필요하다.
+    """
     key = "fear_greed"
     cached = _get_cached(key, ttl=30)
     if cached:
         return cached
 
+    headers = {
+        "User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                       "AppleWebKit/537.36 (KHTML, like Gecko) "
+                       "Chrome/120.0.0.0 Safari/537.36"),
+        "Accept": "application/json, text/plain, */*",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "https://www.cnn.com/markets/fear-and-greed",
+        "Origin": "https://www.cnn.com",
+    }
+
     try:
         r = requests.get(
-            "https://api.alternative.me/fng/?limit=30&format=json",
+            "https://production.dataviz.cnn.io/index/fearandgreed/graphdata",
+            headers=headers,
             timeout=10,
         )
-        data = r.json()["data"]
-        latest = data[0]
+        data = r.json()
+        current = data["fear_and_greed"]
+        hist_raw = data["fear_and_greed_historical"]["data"]
+
+        # CNN 히스토리는 과거→현재(오름차순)이지만, 페이지 코드는
+        # history[0]=최신(전일 대비·7일 미니차트)을 기대하므로 역순 정렬.
+        # 최신순 정렬 후 최근 30일만 사용 (페이지 '30일 추이' 차트용)
         history = [
             {
-                "date":  datetime.fromtimestamp(int(d["timestamp"])),
-                "value": int(d["value"]),
-                "label": d["value_classification"],
+                "date":  datetime.fromtimestamp(d["x"] / 1000),
+                "value": int(round(d["y"])),
+                "label": str(d.get("rating", "")).title(),
             }
-            for d in data
-        ]
+            for d in sorted(hist_raw, key=lambda x: x["x"], reverse=True)
+        ][:30]
+
         result = {
-            "value":   int(latest["value"]),
-            "label":   latest["value_classification"],
+            "value":   int(round(current["score"])),
+            "label":   str(current["rating"]).title(),
             "history": history,
         }
         _set_cache(key, result)
