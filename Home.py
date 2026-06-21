@@ -192,12 +192,15 @@ with col_fg:
 # VIX 게이지
 with col_vix:
     vix_val = market.get("VIX", {}).get("price", 20)
+    vix_asof = market.get("VIX", {}).get("asof", "")
     vix_color, vix_status = get_vix_color_and_status(vix_val)
 
+    _vix_date_line = (f"<br><span style='font-size:11px;color:#888'>기준일 {vix_asof} · 일봉 종가</span>"
+                      if vix_asof else "")
     fig_vix = go.Figure(go.Indicator(
         mode="gauge+number",
         value=vix_val,
-        title={"text": f"VIX 공포지수<br><span style='font-size:14px;color:{vix_color}'>{vix_status}</span>",
+        title={"text": f"VIX 공포지수<br><span style='font-size:14px;color:{vix_color}'>{vix_status}</span>{_vix_date_line}",
                "font": {"color": "#ccc", "size": 16}},
         number={"font": {"color": vix_color, "size": 56}},
         gauge={

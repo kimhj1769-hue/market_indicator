@@ -78,11 +78,18 @@ def _fetch_single_ticker(name: str, sym: str) -> tuple:
         else:
             return None
 
+        # 데이터 기준일(일봉 종가 날짜)
+        try:
+            asof = hist.index[-1].strftime("%Y-%m-%d")
+        except Exception:
+            asof = ""
+
         return (name, {
             "price":   cur,
             "change":  chg,
             "pct":     pct,
             "symbol":  sym,
+            "asof":    asof,
         })
     except Exception as e:
         # 에러 로깅만 하고 None 반환
