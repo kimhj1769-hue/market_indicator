@@ -159,12 +159,15 @@ col_fg, col_vix = st.columns(2)
 with col_fg:
     fg_val = fg["value"]
     fg_lbl = fg["label"]
+    fg_asof = fg.get("asof", "")
     fg_color, fg_emoji = get_fg_color_and_emoji(fg_val)
 
+    _fg_date_line = (f"<br><span style='font-size:11px;color:#888'>기준일 {fg_asof}</span>"
+                     if fg_asof else "")
     fig_fg = go.Figure(go.Indicator(
         mode="gauge+number",
         value=fg_val,
-        title={"text": f"Fear & Greed Index<br><span style='font-size:14px;color:{fg_color}'>{fg_emoji}</span>",
+        title={"text": f"Fear & Greed Index<br><span style='font-size:14px;color:{fg_color}'>{fg_emoji}</span>{_fg_date_line}",
                "font": {"color": "#ccc", "size": 16}},
         number={"font": {"color": fg_color, "size": 56}},
         gauge={

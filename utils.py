@@ -189,6 +189,7 @@ def get_fear_greed() -> dict:
             "value":   int(round(current["score"])),
             "label":   str(current["rating"]).title(),
             "history": history,
+            "asof":    history[0]["date"].strftime("%Y-%m-%d") if history else "",
         }
         _set_cache(key, result)
         return result
